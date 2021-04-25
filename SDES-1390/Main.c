@@ -18,6 +18,7 @@ int P10_perm(int key); // function to calclulate P10
 void Split_10(int n, int* split); //Spilt 10 bit key to two 5 bit ones in half
 static inline int bin(int bits, int shift); //aux function for packing shi(f)t commands
 void print_bin(int n, int bits);//print in bin
+void LS_1(int* split); //Shifts the 5bit keys array once to the left (with loop)
 
 
 int main(void) {
@@ -44,6 +45,12 @@ int main(void) {
     printf("split1: %d\n", split[0]);
     print_bin(split[0], 5);
     printf("split2: %d\n", split[1]);
+    print_bin(split[1], 5);
+
+    LS_1(split);
+    printf("shift1: %d\n", split[0]);
+    print_bin(split[0], 5);
+    printf("shift2: %d\n", split[1]);
     print_bin(split[1], 5);
 
 
@@ -88,4 +95,17 @@ void Split_10(int n, int* split) { //Spilt 10 bit key to two 5 bit ones in half
     *split = (0b1111100000 & n) >> 5;
     split++;
     *split = 0b0000011111 & n;
+}
+
+void LS_1(int* split) { //Shifts the 5bit keys array once to the left (with loop)
+    int temp;
+    for (int i = 0; i < 2; i++) {
+        temp = *split << 1;
+        if (temp >= 32) {
+            temp = (0b011110 & temp) + 1; //keep 1-4 bits and add 1
+        }
+        *split = temp;
+        split++;
+    }
+
 }
