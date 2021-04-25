@@ -21,7 +21,7 @@ int IP_perm(int message); // function to calclulate IP
 void Split_8(int n, int* split); //Spilt 8 bit key to two 4 bit ones in half
 int ER_perm(int right); //function to calclulate ER perm
 
-int grid(int S[2], int array[4][4]); //extract elements from array
+int grid(int S, int array[4][4]); //extract elements from array
 
 int main(void) {
 
@@ -273,7 +273,7 @@ int grid(int S, int array[4][4]) { //extract elements from array
 
     int row, col;
     row = ((0b1000 & S) >> 2) + (0b0001 & S); //first and fourth
-    col = (0b0110 & S) >> 1;//secibd and third
+    col = (0b0110 & S) >> 1;//second and third
 
     return array[row][col];
 
