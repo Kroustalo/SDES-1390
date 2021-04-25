@@ -21,13 +21,23 @@ int IP_perm(int message); // function to calclulate IP
 void Split_8(int n, int* split); //Spilt 8 bit key to two 4 bit ones in half
 int ER_perm(int right); //function to calclulate ER perm
 
+int grid(int S[2], int array[4][4]); //extract elements from array
+
 int main(void) {
 
     int  key, output, k1, k2;
     int split[2];
     
+
     int message, ER,XOROUT;
     int LR[2];
+
+    int s0[4][4] = { {1,0,3,2},{3,2,1,0},{0,2,1,3},{3,1,3,2} };
+    int s1[4][4] = { {0,1,2,3},{2,0,1,3},{3,0,1,0},{2,1,0,3} };
+
+    int S[2]; //for s0 and s1 respectivly
+    int parts[2]; //returns from s0 and s1
+
 
     message = 0b11110011;
     key = 0b1010000010; //642
@@ -49,7 +59,7 @@ int main(void) {
     print_bin(key, 10);
     
 
-    //SPLIT
+    //SPLIT 10
     Split_10(key, split);
      printf("\nsplit1: %d\n", split[0]);
     print_bin(split[0], 5);
@@ -94,7 +104,7 @@ int main(void) {
     printf("\nIP: %d\n", message);
     print_bin(message, 8);
 
-    //SPLIT
+    //SPLIT 8
     Split_8(message, LR);
     printf("\nLEFT: %d\n", LR[0]);
     print_bin(LR[0], 4);
@@ -114,6 +124,26 @@ int main(void) {
     XOROUT = ER ^k1;
     printf("\nER XOR k1 out: %d\n", XOROUT);
     print_bin(XOROUT, 8);
+
+
+
+    //SPLIT 8 #2
+    Split_8(XOROUT, S);
+    printf("\nS0  PART: %d\n", S[0]);
+    print_bin(S[0], 4);
+    printf("S1 PART: %d\n", S[1]);
+    print_bin(S[1], 4);
+
+
+    //GRID
+    parts[0] = grid(S[0], s0);
+    parts[1] = grid(S[1], s1);
+
+    printf("\nS0  return: %d\n", parts[0]);
+    print_bin(parts[0], 2);
+    printf("S1 return: %d\n", parts[1]);
+    print_bin(parts[1], 2);
+
     return 0;
 
 }
@@ -236,5 +266,15 @@ int ER_perm(int right) {
     }
 
     return temp;
+
+}
+
+int grid(int S, int array[4][4]) { //extract elements from array
+
+    int row, col;
+    row = ((0b1000 & S) >> 2) + (0b0001 & S); //first and fourth
+    col = (0b0110 & S) >> 1;//secibd and third
+
+    return array[row][col];
 
 }
