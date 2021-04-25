@@ -29,7 +29,7 @@ int main(void) {
     key = 0b1010000010; //642
           // 0b1000001100 524
     printf("OG: %d\n", key);
-
+    print_bin(key, 10);
     key=P10_perm(key);
 
     if (key == -1) { //saftey
@@ -37,17 +37,14 @@ int main(void) {
     }
 
 
-    printf("\nPERM: %d\n", key);
+    printf("PERM: %d\n", key);
     print_bin(key, 10);
 
     Split_10(key, split);
     printf("split1: %d\n", split[0]);
+    print_bin(split[0], 5);
     printf("split2: %d\n", split[1]);
-
-
-
-    
-
+    print_bin(split[1], 5);
 
 
     return 0;
