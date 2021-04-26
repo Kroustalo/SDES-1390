@@ -12,6 +12,8 @@
 
 static inline int bin(int bits, int shift); //aux function for packing shi(f)t commands
 void print_bin(int n, int bits); //aux print in bin
+void Split(int n, int bits, int* split); //spilt custom
+
 int P10_perm(int key); // function to calclulate P10
 void Split_10(int n, int* split); //Spilt 10 bit key to two 5 bit ones in half
 void LS_1(int* split); //Shifts the 5bit keys array once to the left (with loop)
@@ -60,8 +62,8 @@ int main(void) {
     
 
     //SPLIT 10
-    Split_10(key, split);
-     printf("\nsplit1: %d\n", split[0]);
+    Split(key, 10, split);
+    printf("\nsplit1: %d\n", split[0]);
     print_bin(split[0], 5);
     printf("split2: %d\n", split[1]);
     print_bin(split[1], 5);
@@ -105,11 +107,11 @@ int main(void) {
     print_bin(message, 8);
 
     //SPLIT 8
-    Split_8(message, LR);
+    Split(message,8,LR);
     printf("\nLEFT: %d\n", LR[0]);
-    print_bin(LR[0], 4);
+    print_bin(LR[0], 5);
     printf("RIGHT: %d\n", LR[1]);
-    print_bin(LR[1], 4);
+    print_bin(LR[1], 5);
 
     //ER
     ER = ER_perm(LR[1]);
@@ -128,7 +130,7 @@ int main(void) {
 
 
     //SPLIT 8 #2
-    Split_8(XOROUT, S);
+    Split(XOROUT,8,S);
     printf("\nS0  PART: %d\n", S[0]);
     print_bin(S[0], 4);
     printf("S1 PART: %d\n", S[1]);
@@ -161,6 +163,13 @@ static inline int bin(int bits, int shift) {
     return (1 << bits - 1) >> shift;
 }
 
+//spilt custom in half (even bit)
+void Split(int n, int bits, int* split) {
+    *split = n >> (bits / 2); //upper part 
+    split++;
+    *split = ((1 << bits / 2) - 1) & n; //lower part
+}
+
 //function to calclulate P10
 int P10_perm(int key) {
     if (key > 1023) {
@@ -176,13 +185,6 @@ int P10_perm(int key) {
     }
     return temp;
 
-}
-
-//Spilt 10 bit key to two 5 bit ones in half
-void Split_10(int n, int* split) { //Spilt 10 bit key to two 5 bit ones in half
-    *split = (0b1111100000 & n) >> 5;
-    split++;
-    *split = 0b0000011111 & n;
 }
 
 void LS_1(int* split) { //Shifts the 5bit keys array once to the left (with loop)
@@ -231,13 +233,6 @@ int IP_perm(int message){
     }
     return temp;
 
-}
-
-//Spilt 8 bit key to two 4 bit ones in half
-void Split_8(int n, int* split) {
-    *split = (0b11110000 & n) >> 4;
-    split++;
-    *split = 0b00001111 & n;
 }
 
 //function to calclulate ER perm
