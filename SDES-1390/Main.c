@@ -24,7 +24,9 @@ int ER_perm(int right); //function to calclulate ER perm
 int grid(int S, int array[4][4]); //extract elements from array
 int P4_perm(int parts[2]); //P4 perm after array
 
-void process(int LR[2], int k, int* output); //encrypting function
+void process(int LR[2], int k, int* output); //process function
+int encrypt(int message, int k1, int k2);  //encrypt
+int decrypt(int message, int k1, int k2);  //decrypt
 int IP_REV_perm(int message); // function to calclulate REVERSED IP PERM
 
 int main(void) {
@@ -32,9 +34,7 @@ int main(void) {
     int  key, message, output, k1,k2; 
     int split[2],LR[2];
    
-    int enc1[2], enc2[2];
-
-    int option = 2; //encrypt 1 | decrypt 2 | hack 3
+    int option = 1; //encrypt 1 | decrypt 2 | hack 3
 
     message = 0b11110011;
     key = 0b1010000010; //642
@@ -46,7 +46,7 @@ int main(void) {
     message = 0b00000000;
     key = 0b1111111111;
 
-    message = 131;
+    message = 200;
     key = 550;
     
     //message
@@ -64,7 +64,6 @@ int main(void) {
         return 1;
     }
 
-    
     printf("\nP10: %d\n", key);
     print_bin(key, 10);
     
@@ -111,30 +110,10 @@ int main(void) {
     printf("\nIP: %d\n", message);
     print_bin(message, 8);
 
-    //SPLIT 8
-    Split(message, 8, LR);
 
 /*---------------------------------*/
     if (option == 1) {
-       
-            //ENCRYPT 1
-        printf("\nENCRYPT #1\n");
-        process(LR, k1, enc1);
-
-        //switch
-        LR[0] = enc1[1];
-        LR[1] = enc1[0];
-
-        //ENCRYPT 2
-        printf("\nENCRYPT #2\n");
-        process(LR, k2, enc2);
-
-        //OUTPUT
-        output = 0;
-        output += (enc2[0] << 4) + enc2[1];
-
-        //REVERSED PERMUTATION
-        output = IP_REV_perm(output);
+        output = encrypt(message, k1, k2);
         if (output == -1) { //saftey
             return 1;
         }
@@ -144,32 +123,17 @@ int main(void) {
 /*---------------------------------*/
 /*---------------------------------*/
     else if (option == 2) {
-
-        //DECRYPT 1
-        printf("\nDECRYPT #1\n");
-        process(LR, k2, enc1);
-
-        //switch
-        LR[0] = enc1[1];
-        LR[1] = enc1[0];
-
-        //DECRYPT 2
-        printf("\nDECRYPT #2\n");
-        process(LR, k1, enc2);
-
-        //OUTPUT
-        output = 0;
-        output += (enc2[0] << 4) + enc2[1];
-
-        //REVERSED PERMUTATION
-        output = IP_REV_perm(output);
+        output = decrypt(message, k1, k2);
         if (output == -1) { //saftey
             return 1;
         }
-        printf("\nENCODED: %d\n", output);
+        printf("\nDECODED: %d\n", output);
         print_bin(output, 8);
     }
-    /*---------------------------------*/
+/*---------------------------------*/
+    else {
+        //HACKERMAN
+    }
     return 0;
 
 }
@@ -414,6 +378,61 @@ int IP_REV_perm(int message) {
         temp += (message & mafs) / mafs * 1 << IP_GUIDE[i];
     }
     return temp;
-
 }
 
+
+int encrypt(int message, int k1, int k2) {
+    int output, LR[2];
+    int enc1[2], enc2[2];
+    //SPLIT 8
+    Split(message, 8, LR);
+
+    //ENCRYPT 1
+    printf("\nENCRYPT #1\n");
+    process(LR, k1, enc1);
+
+    //switch
+    LR[0] = enc1[1];
+    LR[1] = enc1[0];
+
+    //ENCRYPT 2
+    printf("\nENCRYPT #2\n");
+    process(LR, k2, enc2);
+
+    //OUTPUT
+    output = 0;
+    output += (enc2[0] << 4) + enc2[1];
+
+    //REVERSED PERMUTATION
+    output = IP_REV_perm(output);
+
+    return output;
+}
+
+int decrypt(int message, int k1, int k2) {
+    int output, LR[2];
+    int enc1[2], enc2[2];
+    //SPLIT 8
+    Split(message, 8, LR);
+
+    //DECRYPT 1
+    printf("\nDECRYPT #1\n");
+    process(LR, k2, enc1);
+
+    //switch
+    LR[0] = enc1[1];
+    LR[1] = enc1[0];
+
+    //DECRYPT 2
+    printf("\nDECRYPT #2\n");
+    process(LR, k1, enc2);
+
+    //OUTPUT
+    output = 0;
+    output += (enc2[0] << 4) + enc2[1];
+
+    //REVERSED PERMUTATION
+    output = IP_REV_perm(output);
+
+    return output;
+}
