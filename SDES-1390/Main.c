@@ -32,7 +32,7 @@ int IP_REV_perm(int message); // function to calclulate REVERSED IP PERM
 int main(void) {
 
     int  key, message, output, k1,k2; 
-    int split[2],LR[2];
+    int split[2];
    
     int option = 1; //encrypt 1 | decrypt 2 | hack 3
 
@@ -141,14 +141,14 @@ int main(void) {
 //aux print in bin
 void print_bin(int n, int bits) {
     unsigned i;
-    for (i = 1 << bits - 1; i > 0; i = i / 2)
+    for (i = (1 << (bits - 1)); i > 0; i = i / 2)
         (n & i) ? printf("1") : printf("0");
     printf("\n");
 }
 
 //aux function for packing shi(f)t commands
 static inline int bin(int bits, int shift) {
-    return (1 << bits - 1) >> shift;
+    return (1 << (bits - 1)) >> shift;
 }
 
 //spilt custom in half (even bit)
@@ -303,7 +303,7 @@ void process(int LR[2], int k, int* LFR) {
 
     int S[2]; //for s0 and s1 respectivly
     int parts[2]; //returns from s0 and s1
-    int p4, XOROUT2;
+    int p4;
 
     printf("\nLEFT: %d\n", LR[0]);
     print_bin(LR[0], 4);
