@@ -15,15 +15,14 @@ void print_bin(int n, int bits); //aux print in bin
 void Split(int n, int bits, int* split); //spilt custom
 
 int P10_perm(int key); // function to calclulate P10
-void Split_10(int n, int* split); //Spilt 10 bit key to two 5 bit ones in half
 void LS_1(int* split); //Shifts the 5bit keys array once to the left (with loop)
 int K_perm(int split[2]); //Create K1 key
 
 int IP_perm(int message); // function to calclulate IP
-void Split_8(int n, int* split); //Spilt 8 bit key to two 4 bit ones in half
 int ER_perm(int right); //function to calclulate ER perm
 
 int grid(int S, int array[4][4]); //extract elements from array
+int P4_perm(int parts[2]); //P4 perm after array
 
 int main(void) {
 
@@ -31,14 +30,15 @@ int main(void) {
     int split[2];
     
 
-    int message, ER,XOROUT;
-    int LR[2];
+    int message, ER,XOROUT1;
+    int LR[2]; //0 LEFT 1 RIGHT
 
     int s0[4][4] = { {1,0,3,2},{3,2,1,0},{0,2,1,3},{3,1,3,2} };
     int s1[4][4] = { {0,1,2,3},{2,0,1,3},{3,0,1,0},{2,1,0,3} };
 
     int S[2]; //for s0 and s1 respectivly
     int parts[2]; //returns from s0 and s1
+    int p4, XOROUT2;
 
 
     message = 0b11110011;
@@ -109,9 +109,9 @@ int main(void) {
     //SPLIT 8
     Split(message,8,LR);
     printf("\nLEFT: %d\n", LR[0]);
-    print_bin(LR[0], 5);
+    print_bin(LR[0], 4);
     printf("RIGHT: %d\n", LR[1]);
-    print_bin(LR[1], 5);
+    print_bin(LR[1], 4);
 
     //ER
     ER = ER_perm(LR[1]);
@@ -123,14 +123,14 @@ int main(void) {
     print_bin(ER, 8);
 
     //XOR OUT
-    XOROUT = ER ^k1;
-    printf("\nER XOR k1 out: %d\n", XOROUT);
-    print_bin(XOROUT, 8);
+    XOROUT1 = ER ^k1;
+    printf("\nER XOR k1 out: %d\n", XOROUT1);
+    print_bin(XOROUT1, 8);
 
 
 
     //SPLIT 8 #2
-    Split(XOROUT,8,S);
+    Split(XOROUT1,8,S);
     printf("\nS0  PART: %d\n", S[0]);
     print_bin(S[0], 4);
     printf("S1 PART: %d\n", S[1]);
@@ -145,6 +145,20 @@ int main(void) {
     print_bin(parts[0], 2);
     printf("S1 return: %d\n", parts[1]);
     print_bin(parts[1], 2);
+
+
+    //P4
+    p4 = P4_perm(parts);
+    if (key == -1) { //saftey
+        return 1;
+    }
+    printf("\nP4: %d\n", p4);
+    print_bin(p4, 4);
+
+    //XOR OUT
+    XOROUT2 = p4 ^ LR[0];
+    printf("\nER XOR k1 out: %d\n", XOROUT2);
+    print_bin(XOROUT2, 4);
 
     return 0;
 
@@ -273,3 +287,34 @@ int grid(int S, int array[4][4]) { //extract elements from array
     return array[row][col];
 
 }
+
+//P4 perm after array
+int P4_perm(int parts[2]) {
+    if (parts[0] > 3) {
+        printf("part 1 is greater than 2 bits");
+        return -1;
+    }
+    if (parts[1] > 3) {
+        printf("part 2 is greater than 2 bits");
+        return -1;
+    }
+
+    int temp = 0, mafs;
+
+    //higher part 
+    int P4_GUIDE1[2] = { 0,3 }; //Shift positions according to pdf
+    for (int i = 0; i < 2; i++) {
+        mafs = bin(2, i);
+        temp += (parts[0] & mafs) / mafs * 1 << P4_GUIDE1[i];
+    }
+
+    //lower part
+    int P4_GUIDE2[4] = { 1,2 }; //Shift positions according to pdf
+    for (int i = 0; i < 2; i++) {
+        mafs = bin(2, i);
+        temp += (parts[1] & mafs) / mafs * 1 << P4_GUIDE2[i];
+    }
+
+    return temp;
+}
+
