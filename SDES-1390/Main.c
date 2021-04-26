@@ -24,29 +24,37 @@ int ER_perm(int right); //function to calclulate ER perm
 int grid(int S, int array[4][4]); //extract elements from array
 int P4_perm(int parts[2]); //P4 perm after array
 
+void process(int LR[2], int k, int* output); //encrypting function
+int IP_REV_perm(int message); // function to calclulate REVERSED IP PERM
+
 int main(void) {
 
-    int  key, output, k1, k2;
-    int split[2];
-    
+    int  key, message, output, k1,k2; 
+    int split[2],LR[2];
+   
+    int enc1[2], enc2[2];
 
-    int message, ER,XOROUT1;
-    int LR[2]; //0 LEFT 1 RIGHT
-
-    int s0[4][4] = { {1,0,3,2},{3,2,1,0},{0,2,1,3},{3,1,3,2} };
-    int s1[4][4] = { {0,1,2,3},{2,0,1,3},{3,0,1,0},{2,1,0,3} };
-
-    int S[2]; //for s0 and s1 respectivly
-    int parts[2]; //returns from s0 and s1
-    int p4, XOROUT2;
-
+    int option = 2; //encrypt 1 | decrypt 2 | hack 3
 
     message = 0b11110011;
     key = 0b1010000010; //642
     // 0b1000001100 524
 
-    //OG
-    printf("10-bit key: %d\n", key);
+    message = 0b00010101;
+    key = 0b0101101000; //360
+   
+    message = 0b00000000;
+    key = 0b1111111111;
+
+    message = 131;
+    key = 550;
+    
+    //message
+    printf("8bit message: %d\n", message);
+    print_bin(message, 8);
+
+    //OG key
+    printf("\n10-bit key: %d\n", key);
     print_bin(key, 10);
     
     //P10
@@ -92,9 +100,6 @@ int main(void) {
     printf("\nK2: %d\n", k2);
     print_bin(k2, 8);
 
-    //message
-    printf("\n8bit message: %d\n", message);
-    print_bin(message, 8);
 
     //ip
     message = IP_perm(message);
@@ -107,59 +112,64 @@ int main(void) {
     print_bin(message, 8);
 
     //SPLIT 8
-    Split(message,8,LR);
-    printf("\nLEFT: %d\n", LR[0]);
-    print_bin(LR[0], 4);
-    printf("RIGHT: %d\n", LR[1]);
-    print_bin(LR[1], 4);
+    Split(message, 8, LR);
 
-    //ER
-    ER = ER_perm(LR[1]);
-    if (ER == -1) { //saftey
+/*---------------------------------*/
+    if (option == 1) {
+       
+            //ENCRYPT 1
+        printf("\nENCRYPT #1\n");
+        process(LR, k1, enc1);
+
+        //switch
+        LR[0] = enc1[1];
+        LR[1] = enc1[0];
+
+        //ENCRYPT 2
+        printf("\nENCRYPT #2\n");
+        process(LR, k2, enc2);
+
+        //OUTPUT
+        output = 0;
+        output += (enc2[0] << 4) + enc2[1];
+
+        //REVERSED PERMUTATION
+        output = IP_REV_perm(output);
+        if (output == -1) { //saftey
             return 1;
+        }
+        printf("\nENCODED: %d\n", output);
+        print_bin(output, 8);
     }
+/*---------------------------------*/
+/*---------------------------------*/
+    else if (option == 2) {
 
-    printf("\nER: %d\n", ER);
-    print_bin(ER, 8);
+        //DECRYPT 1
+        printf("\nDECRYPT #1\n");
+        process(LR, k2, enc1);
 
-    //XOR OUT
-    XOROUT1 = ER ^k1;
-    printf("\nER XOR k1 out: %d\n", XOROUT1);
-    print_bin(XOROUT1, 8);
+        //switch
+        LR[0] = enc1[1];
+        LR[1] = enc1[0];
 
+        //DECRYPT 2
+        printf("\nDECRYPT #2\n");
+        process(LR, k1, enc2);
 
+        //OUTPUT
+        output = 0;
+        output += (enc2[0] << 4) + enc2[1];
 
-    //SPLIT 8 #2
-    Split(XOROUT1,8,S);
-    printf("\nS0  PART: %d\n", S[0]);
-    print_bin(S[0], 4);
-    printf("S1 PART: %d\n", S[1]);
-    print_bin(S[1], 4);
-
-
-    //GRID
-    parts[0] = grid(S[0], s0);
-    parts[1] = grid(S[1], s1);
-
-    printf("\nS0  return: %d\n", parts[0]);
-    print_bin(parts[0], 2);
-    printf("S1 return: %d\n", parts[1]);
-    print_bin(parts[1], 2);
-
-
-    //P4
-    p4 = P4_perm(parts);
-    if (key == -1) { //saftey
-        return 1;
+        //REVERSED PERMUTATION
+        output = IP_REV_perm(output);
+        if (output == -1) { //saftey
+            return 1;
+        }
+        printf("\nENCODED: %d\n", output);
+        print_bin(output, 8);
     }
-    printf("\nP4: %d\n", p4);
-    print_bin(p4, 4);
-
-    //XOR OUT
-    XOROUT2 = p4 ^ LR[0];
-    printf("\nER XOR k1 out: %d\n", XOROUT2);
-    print_bin(XOROUT2, 4);
-
+    /*---------------------------------*/
     return 0;
 
 }
@@ -316,5 +326,94 @@ int P4_perm(int parts[2]) {
     }
 
     return temp;
+}
+
+
+//encrypting function
+void process(int LR[2], int k, int* LFR) {
+
+    int ER, XOROUT1;
+
+    int s0[4][4] = { {1,0,3,2},{3,2,1,0},{0,2,1,3},{3,1,3,2} };
+    int s1[4][4] = { {0,1,2,3},{2,0,1,3},{3,0,1,0},{2,1,0,3} };
+
+    int S[2]; //for s0 and s1 respectivly
+    int parts[2]; //returns from s0 and s1
+    int p4, XOROUT2;
+
+    printf("\nLEFT: %d\n", LR[0]);
+    print_bin(LR[0], 4);
+    printf("RIGHT: %d\n", LR[1]);
+    print_bin(LR[1], 4);
+
+    //ER
+    ER = ER_perm(LR[1]);
+    if (ER == -1) { //saftey
+        return 1;
+    }
+
+    printf("\nER: %d\n", ER);
+    print_bin(ER, 8);
+
+    //XOR OUT
+    XOROUT1 = ER ^ k;
+    printf("\nER XOR k1 out: %d\n", XOROUT1);
+    print_bin(XOROUT1, 8);
+
+
+
+    //SPLIT 8 #2
+    Split(XOROUT1, 8, S);
+    printf("\nS0  PART: %d\n", S[0]);
+    print_bin(S[0], 4);
+    printf("S1 PART: %d\n", S[1]);
+    print_bin(S[1], 4);
+
+
+    //GRID
+    parts[0] = grid(S[0], s0);
+    parts[1] = grid(S[1], s1);
+
+    printf("\nS0  return: %d\n", parts[0]);
+    print_bin(parts[0], 2);
+    printf("S1 return: %d\n", parts[1]);
+    print_bin(parts[1], 2);
+
+
+    //P4
+    p4 = P4_perm(parts);
+    if (p4 == -1) { //saftey
+        return 1;
+    }
+    printf("\nP4: %d\n", p4);
+    print_bin(p4, 4);
+
+    //XOR OUT 2
+    *LFR = p4 ^ LR[0]; //result
+    printf("\np4(LF) XOR k out: %d\n", *LFR);
+    print_bin(*LFR, 4);
+
+    printf("\n(R)Right: %d\n", LR[1]);
+    print_bin(LR[1], 4);
+
+    LFR++;
+    *LFR = LR[1]; //right
+}
+
+// function to calclulate REVERSED IP PERM
+int IP_REV_perm(int message) {
+    if (message > 255) {
+        printf("value is greater than 8 bits");
+        return -1;
+    }
+
+    int temp = 0, mafs;
+    int IP_GUIDE[8] = { 6,2,5,7,4,0,3,1 }; //Shift positions according to pdf
+    for (int i = 0; i < 8; i++) {
+        mafs = bin(8, i);
+        temp += (message & mafs) / mafs * 1 << IP_GUIDE[i];
+    }
+    return temp;
+
 }
 
