@@ -142,6 +142,7 @@
     <ClCompile Include="Main.c" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="old mafs.txt" />
     <Text Include="pastebin.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

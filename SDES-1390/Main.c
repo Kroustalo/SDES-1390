@@ -36,9 +36,22 @@ int hack(int message, int encrypted); //bruteforce all keys to find the right on
 
 int main(void) {
 
-    int  key, message, output, k1,k2; 
-   
-    int option = 3; //encrypt 1 | decrypt 2 | hack 3
+    int option =3; //encrypt 1 | decrypt 2 | hack 3
+/*
+    printf("1) Encrypt\n2) Decrypt\n3)Hack\nSelect Option:");
+    scanf("%d", &option);
+    while (option != 1 && option != 2 && option != 3) {
+        printf("Error: Not Vaild Option, select again:\n1) Encrypt\n2) Decrypt\n3)Hack\nSelect Option:");
+        scanf("%d", &option);
+    }
+    */
+    int  key, message, output, k1,k2, encrypted;
+    /*
+    char name[11];
+    printf("Enter name: ");
+    gets(name);
+    printf("Your name is %s\n", name);
+    */
 
     message = 0b11110011;
     key = 0b1010000010; //642
@@ -52,6 +65,8 @@ int main(void) {
 
     message = 200;
     key = 550;
+
+    encrypted = 131;
     
     //message
     printf("8bit message:\nDecimal: %d\nBinary: ", message);
@@ -85,7 +100,6 @@ int main(void) {
     }
 /*---------------------------------*/
     else {
-        int encrypted = 131;
         printf("\nI'm about to hack Your Mom!\n");
         printf("\nEncoded Message:\nDecimal: %d\nBinary: ", encrypted);
         print_bin(encrypted, 8);
@@ -130,11 +144,13 @@ int P10_perm(int key) {
         return -1;
     }
 
-    int temp = 0, mafs;
-    int P10_GUIDE[10] = { 3,7,9,5,8,0,6,1,2,4 }; //Shift positions according to pdf
+    int temp = 0;
+    int P10_GUIDE[10] = { 4,1,-1,3,-4,3,-1,2,-1,-6 }; //Shift positions according to pdf
     for (int i = 0; i < 10; i++) {
-        mafs = bin(10, i);
-        temp += (key & mafs) / mafs * 1 << P10_GUIDE[i];
+        if (P10_GUIDE[i] >= 0)
+            temp += (key & (1 << i)) << P10_GUIDE[i];
+        else
+            temp += (key & (1 << i)) >> -P10_GUIDE[i];
     }
     return temp;
 
@@ -161,11 +177,13 @@ int K_perm(int split[2]) { //Create K keys with specific input
     temp = temp & 0b11111111; // get 8bit number
     //print_bin(temp, 8); //test
 
-    int k = 0, mafs;
-    int P8_GUIDE[8] = { 6,4,2,7,5,3,0,1 }; //Shift positions according to pdf
+    int k = 0;
+    int P8_GUIDE[8] = { 1,-1,1,2,3,-3,-2,-1}; //Shift positions according to pdf
     for (int i = 0; i < 8; i++) {
-        mafs = bin(8, i);
-        k += (temp & mafs) / mafs * 1 << P8_GUIDE[i];
+        if (P8_GUIDE[i] >= 0)
+            k += (temp & (1 << i)) << P8_GUIDE[i];
+        else
+            k += (temp & (1 << i)) >> -P8_GUIDE[i];
     }
 
     return k;
@@ -178,11 +196,13 @@ int IP_perm(int message){
         return -1;
     }
 
-    int temp = 0, mafs;
-    int IP_GUIDE[8] = { 4,7,5,3,1,6,0,2 }; //Shift positions according to pdf
+    int temp = 0;
+    int IP_GUIDE[8] = { 2,-1,4,-2,-1,0,1,-3}; //Shift positions according to pdf
     for (int i = 0; i < 8; i++) {
-        mafs = bin(8, i);
-        temp += (message & mafs) / mafs * 1 << IP_GUIDE[i];
+        if (IP_GUIDE[i] >= 0)
+            temp += (message & (1 << i)) << IP_GUIDE[i];
+        else
+            temp += (message & (1 << i)) >> -IP_GUIDE[i];
     }
     return temp;
 
@@ -195,23 +215,27 @@ int ER_perm(int right) {
         return -1;
     }
 
-    int temp = 0, mafs;
+    int temp = 0;
 
-    //higher part 
-    int ER_GUIDE1[4] = { 2, 1, 0, 3 }; //Shift positions according to pdf
-    for (int i = 0; i < 4; i++) {
-        mafs = bin(4, i);
-        temp += (right & mafs) / mafs * 1 << ER_GUIDE1[i];
+    //lower 
+    int ER_GUIDE[4] = { 3,-1,-1,-1 }; //Shift positions according to pdf
+    for (int j = 0; j < 2; j++) {
+        for (int i = 0; i < 4; i++) {
+            if (ER_GUIDE[i] >= 0)
+                temp += (right & (1 << i)) << ER_GUIDE[i];
+            else
+                temp += (right & (1 << i)) >> -ER_GUIDE[i];
+        }
+        if (j == 0) {//for lower part
+            ER_GUIDE[0] = 1;
+            ER_GUIDE[1] = 1;
+            ER_GUIDE[2] = 1;
+            ER_GUIDE[3] = -3;
+
+            temp = temp << 4;
+        }
     }
 
-    temp = temp << 4; 
-
-    //lower part
-    int ER_GUIDE2[4] = { 0,3,2,1 }; //Shift positions according to pdf
-    for (int i = 0; i < 4; i++) {
-        mafs = bin(4, i);
-        temp += (right & mafs) / mafs * 1 << ER_GUIDE2[i];
-    }
 
     return temp;
 
@@ -238,21 +262,18 @@ int P4_perm(int parts[2]) {
         return -1;
     }
 
-    int temp = 0, mafs;
 
+    int value = (parts[0] << 2) + parts[1];
+    int temp = 0;
     //higher part 
-    int P4_GUIDE1[2] = { 0,3 }; //Shift positions according to pdf
-    for (int i = 0; i < 2; i++) {
-        mafs = bin(2, i);
-        temp += (parts[0] & mafs) / mafs * 1 << P4_GUIDE1[i];
+    int P4_GUIDE1[4] = { 2,0,1,-3 }; //Shift positions according to pdf
+    for (int i = 0; i < 4; i++) {
+        if (P4_GUIDE1[i] >= 0)
+            temp += (value & (1 << i)) << P4_GUIDE1[i];
+        else
+            temp += (value & (1 << i)) >> -P4_GUIDE1[i];
     }
 
-    //lower part
-    int P4_GUIDE2[4] = { 1,2 }; //Shift positions according to pdf
-    for (int i = 0; i < 2; i++) {
-        mafs = bin(2, i);
-        temp += (parts[1] & mafs) / mafs * 1 << P4_GUIDE2[i];
-    }
 
     return temp;
 }
@@ -349,11 +370,13 @@ int IP_REV_perm(int message) {
         return -1; 
     }
 
-    int temp = 0, mafs;
-    int IP_GUIDE[8] = { 6,2,5,7,4,0,3,1 }; //Shift positions according to pdf
+    int temp = 0;
+    int IP_GUIDE[8] = { 1,2,-2,1,3,0,-4,-1 }; //Shift positions according to pdf
     for (int i = 0; i < 8; i++) {
-        mafs = bin(8, i);
-        temp += (message & mafs) / mafs * 1 << IP_GUIDE[i];
+        if (IP_GUIDE[i] >= 0)
+            temp += (message & (1 << i)) << IP_GUIDE[i];
+        else
+            temp += (message & (1 << i)) >> -IP_GUIDE[i];
     }
     return temp;
 }
@@ -410,6 +433,8 @@ int init(int key, int *k1, int *k2) {
     printf("\nK2: %d\n", k2);
     print_bin(k2, 8);
     */
+
+    return 0;
 }
 int encrypt(int message, int k1, int k2) {
     int output, LR[2];
