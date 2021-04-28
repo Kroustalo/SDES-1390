@@ -50,11 +50,11 @@ int main(void) {
     key = 550;
     
     //message
-    printf("8bit message: %d\n", message);
+    printf("8bit message:\nDecimal: %d\nBinary:", message);
     print_bin(message, 8);
 
     //OG key
-    printf("\n10-bit key: %d\n", key);
+    printf("\n10-bit key:\nDecimal: %d\nBinary:", key);
     print_bin(key, 10);
     
     //P10
@@ -63,42 +63,49 @@ int main(void) {
     if (key == -1) { //saftey
         return 1;
     }
-
+    /*
     printf("\nP10: %d\n", key);
     print_bin(key, 10);
-    
+    */
 
     //SPLIT 10
     Split(key, 10, split);
+    /*
     printf("\nsplit1: %d\n", split[0]);
     print_bin(split[0], 5);
     printf("split2: %d\n", split[1]);
     print_bin(split[1], 5);
-    
+    */
 
     //K1
     LS_1(split);
+    /*
     printf("\nls1 shift1: %d\n", split[0]);
     print_bin(split[0], 5);
     printf("ls1 shift2: %d\n", split[1]);
     print_bin(split[1], 5);
-
+    */
     k1 = K_perm(split);
+    /*
     printf("\nK1: %d\n", k1);
     print_bin(k1, 8);
+    */
 
     //K2
     LS_1(split);
     LS_1(split);
+    /*
     printf("\nls2 shift1: %d\n", split[0]);
     print_bin(split[0], 5);
     printf("ls2 shift2: %d\n", split[1]);
     print_bin(split[1], 5);
+    */
 
     k2 = K_perm(split);
+    /*
     printf("\nK2: %d\n", k2);
     print_bin(k2, 8);
-
+    */
 
     //ip
     message = IP_perm(message);
@@ -106,10 +113,10 @@ int main(void) {
     if (message == -1) { //saftey
         return 1;
     }
-
+    /*
     printf("\nIP: %d\n", message);
     print_bin(message, 8);
-
+    */
 
 /*---------------------------------*/
     if (option == 1) {
@@ -117,7 +124,7 @@ int main(void) {
         if (output == -1) { //saftey
             return 1;
         }
-        printf("\nENCODED: %d\n", output);
+        printf("\nEncoded Message:\nDecimal: %d\nBinary:", output);
         print_bin(output, 8);
     }
 /*---------------------------------*/
@@ -127,7 +134,7 @@ int main(void) {
         if (output == -1) { //saftey
             return 1;
         }
-        printf("\nDECODED: %d\n", output);
+        printf("\nDecoded:\nDecimal %d\nBinary:", output);
         print_bin(output, 8);
     }
 /*---------------------------------*/
@@ -304,62 +311,73 @@ void process(int LR[2], int k, int* LFR) {
     int S[2]; //for s0 and s1 respectivly
     int parts[2]; //returns from s0 and s1
     int p4;
-
+    
+    /*
     printf("\nLEFT: %d\n", LR[0]);
     print_bin(LR[0], 4);
     printf("RIGHT: %d\n", LR[1]);
     print_bin(LR[1], 4);
+    */
 
     //ER
     ER = ER_perm(LR[1]);
     if (ER == -1) { //saftey
         return 1;
     }
-
+    
+    /*
     printf("\nER: %d\n", ER);
     print_bin(ER, 8);
+    */
 
     //XOR OUT
     XOROUT1 = ER ^ k;
+    /*
     printf("\nER XOR k1 out: %d\n", XOROUT1);
     print_bin(XOROUT1, 8);
-
+    */
 
 
     //SPLIT 8 #2
     Split(XOROUT1, 8, S);
+    /*
     printf("\nS0  PART: %d\n", S[0]);
     print_bin(S[0], 4);
     printf("S1 PART: %d\n", S[1]);
     print_bin(S[1], 4);
-
+    */
 
     //GRID
     parts[0] = grid(S[0], s0);
     parts[1] = grid(S[1], s1);
 
+    /*
     printf("\nS0  return: %d\n", parts[0]);
     print_bin(parts[0], 2);
     printf("S1 return: %d\n", parts[1]);
     print_bin(parts[1], 2);
-
+    */
 
     //P4
     p4 = P4_perm(parts);
     if (p4 == -1) { //saftey
         return 1;
     }
+    
+    /*
     printf("\nP4: %d\n", p4);
     print_bin(p4, 4);
+    */
 
     //XOR OUT 2
     *LFR = p4 ^ LR[0]; //result
+    /*
     printf("\np4(LF) XOR k out: %d\n", *LFR);
     print_bin(*LFR, 4);
 
     printf("\n(R)Right: %d\n", LR[1]);
     print_bin(LR[1], 4);
-
+    */
     LFR++;
     *LFR = LR[1]; //right
 }
@@ -368,7 +386,7 @@ void process(int LR[2], int k, int* LFR) {
 int IP_REV_perm(int message) {
     if (message > 255) {
         printf("value is greater than 8 bits");
-        return -1;
+        return -1; 
     }
 
     int temp = 0, mafs;
@@ -388,7 +406,7 @@ int encrypt(int message, int k1, int k2) {
     Split(message, 8, LR);
 
     //ENCRYPT 1
-    printf("\nENCRYPT #1\n");
+    //printf("\nENCRYPT #1\n");
     process(LR, k1, enc1);
 
     //switch
@@ -396,7 +414,7 @@ int encrypt(int message, int k1, int k2) {
     LR[1] = enc1[0];
 
     //ENCRYPT 2
-    printf("\nENCRYPT #2\n");
+    //printf("\nENCRYPT #2\n");
     process(LR, k2, enc2);
 
     //OUTPUT
@@ -416,7 +434,7 @@ int decrypt(int message, int k1, int k2) {
     Split(message, 8, LR);
 
     //DECRYPT 1
-    printf("\nDECRYPT #1\n");
+    //printf("\nDECRYPT #1\n");
     process(LR, k2, enc1);
 
     //switch
@@ -424,7 +442,7 @@ int decrypt(int message, int k1, int k2) {
     LR[1] = enc1[0];
 
     //DECRYPT 2
-    printf("\nDECRYPT #2\n");
+    //printf("\nDECRYPT #2\n");
     process(LR, k1, enc2);
 
     //OUTPUT
