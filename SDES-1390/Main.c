@@ -19,7 +19,7 @@ void LS_1(int* split); //Shifts the 5bit keys array once to the left (with loop)
 int K_perm(int split[2]); //Create K1 key
 
 int IP_perm(int message); // function to calclulate IP
-int ER_perm(int right); //function to calclulate ER perm
+int EP_perm(int right); //function to calclulate EP perm
 
 int grid(int S, int array[4][4]); //extract elements from array
 int P4_perm(int parts[2]); //P4 perm after array
@@ -208,8 +208,8 @@ int IP_perm(int message){
 
 }
 
-//function to calclulate ER perm
-int ER_perm(int right) {
+//function to calclulate EP perm
+int EP_perm(int right) {
     if (right > 15) {
         printf("value is greater than 4 bits");
         return -1;
@@ -218,19 +218,19 @@ int ER_perm(int right) {
     int temp = 0;
 
     //lower 
-    int ER_GUIDE[4] = { 3,-1,-1,-1 }; //Shift positions according to pdf
+    int EP_GUIDE[4] = { 3,-1,-1,-1 }; //Shift positions according to pdf
     for (int j = 0; j < 2; j++) {
         for (int i = 0; i < 4; i++) {
-            if (ER_GUIDE[i] >= 0)
-                temp += (right & (1 << i)) << ER_GUIDE[i];
+            if (EP_GUIDE[i] >= 0)
+                temp += (right & (1 << i)) << EP_GUIDE[i];
             else
-                temp += (right & (1 << i)) >> -ER_GUIDE[i];
+                temp += (right & (1 << i)) >> -EP_GUIDE[i];
         }
         if (j == 0) {//for lower part
-            ER_GUIDE[0] = 1;
-            ER_GUIDE[1] = 1;
-            ER_GUIDE[2] = 1;
-            ER_GUIDE[3] = -3;
+            EP_GUIDE[0] = 1;
+            EP_GUIDE[1] = 1;
+            EP_GUIDE[2] = 1;
+            EP_GUIDE[3] = -3;
 
             temp = temp << 4;
         }
@@ -282,7 +282,7 @@ int P4_perm(int parts[2]) {
 //encrypting function
 int process(int LR[2], int k, int* LFR) {
 
-    int ER, XOROUT1;
+    int EP, XOROUT1;
 
     int s0[4][4] = { {1,0,3,2},{3,2,1,0},{0,2,1,3},{3,1,3,2} };
     int s1[4][4] = { {0,1,2,3},{2,0,1,3},{3,0,1,0},{2,1,0,3} };
@@ -298,21 +298,21 @@ int process(int LR[2], int k, int* LFR) {
     print_bin(LR[1], 4);
     */
 
-    //ER
-    ER = ER_perm(LR[1]);
-    if (ER == -1) { //saftey
+    //EP
+    EP = EP_perm(LR[1]);
+    if (EP == -1) { //saftey
         return -1;
     }
     
     /*
-    printf("\nER: %d\n", ER);
-    print_bin(ER, 8);
+    printf("\nEP: %d\n", EP);
+    print_bin(EP, 8);
     */
 
     //XOR OUT
-    XOROUT1 = ER ^ k;
+    XOROUT1 = EP ^ k;
     /*
-    printf("\nER XOR k1 out: %d\n", XOROUT1);
+    printf("\nEP XOR k1 out: %d\n", XOROUT1);
     print_bin(XOROUT1, 8);
     */
 
