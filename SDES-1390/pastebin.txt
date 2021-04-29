@@ -131,3 +131,24 @@
     XOROUT2 = p4 ^ LR[0];
     printf("\nER XOR k1 out: %d\n", XOROUT2);
     print_bin(XOROUT2, 4);
+
+
+        
+    char str[60]; // big buffer
+    int flag = 1;
+    printf("Enter name: ");
+    gets(str);
+    
+    if (strlen(str) > 12)
+        return 1;
+
+    printf("Your name is %s\n", str);
+
+    if (str[0] == '0' && str[1] == 'b' && (str[1] == '0' || str[2] == '1')) {
+        int i = 2;
+        int bin;
+        while (str[i] != '\0') {
+
+
+        }
+    }

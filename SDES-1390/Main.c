@@ -1,6 +1,11 @@
 //Dimitrios Sideris AM: 1390 S-DES
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
+
+#include <string.h>
+
+
 
 /*
 • Είσοδος:   00010101
@@ -36,22 +41,20 @@ int hack(int message, int encrypted); //bruteforce all keys to find the right on
 
 int main(void) {
 
-    int option =3; //encrypt 1 | decrypt 2 | hack 3
-/*
-    printf("1) Encrypt\n2) Decrypt\n3)Hack\nSelect Option:");
-    scanf("%d", &option);
-    while (option != 1 && option != 2 && option != 3) {
-        printf("Error: Not Vaild Option, select again:\n1) Encrypt\n2) Decrypt\n3)Hack\nSelect Option:");
-        scanf("%d", &option);
+
+    char option; //encrypt 1 | decrypt 2 | hack 3
+
+    printf("1) Encrypt\n2) Decrypt\n3) Hack\nSelect Option:");
+    scanf("%c", &option);
+    while (option != '1' && option != '2' && option != '3') {
+        printf("Error: Not Vaild Option, select again:\n1) Encrypt\n2) Decrypt\n3) Hack\nSelect Option:");
+        fflush(stdout);
+        scanf("%c", &option);
     }
-    */
-    int  key, message, output, k1,k2, encrypted;
-    /*
-    char name[11];
-    printf("Enter name: ");
-    gets(name);
-    printf("Your name is %s\n", name);
-    */
+    
+
+    int  key, message, encrypted, k1, k2;
+        
 
     message = 0b11110011;
     key = 0b1010000010; //642
@@ -67,41 +70,83 @@ int main(void) {
     key = 550;
 
     encrypted = 131;
-    
-    //message
-    printf("8bit message:\nDecimal: %d\nBinary: ", message);
-    print_bin(message, 8);
+       
 
-    //OG key
-    printf("\n10-bit key:\nDecimal: %d\nBinary: ", key);
-    print_bin(key, 10);
-   
-    if (init(key,&k1,&k2) == -1) { //saftey
-        return 1;
-    }
 /*---------------------------------*/
-    if (option == 1) {
-        output = encrypt(message, k1, k2);
-        if (output == -1) { //saftey
+    if (option == '1') {
+        //message
+        printf("\nGive message (dec):");
+        scanf("%d", &message);
+
+        printf("8bit message:\nDecimal: %d\nBinary:  ", message);
+        print_bin(message, 8);
+
+        //OG key
+        printf("\nGive key (dec):");
+        scanf("%d", &key);
+
+        printf("10-bit key:\nDecimal: %d\nBinary:  ", key);
+        print_bin(key, 10);
+
+        if (init(key, &k1, &k2) == -1) { //saftey
             return 1;
         }
-        printf("\nEncoded Message:\nDecimal: %d\nBinary: ", output);
-        print_bin(output, 8);
-    }
-/*---------------------------------*/
-/*---------------------------------*/
-    else if (option == 2) {
-        output = decrypt(message, k1, k2);
-        if (output == -1) { //saftey
+
+
+        encrypted = encrypt(message, k1, k2);
+        if (encrypted == -1) { //saftey
             return 1;
         }
-        printf("\nDecoded:\nDecimal %d\nBinary: ", output);
-        print_bin(output, 8);
-    }
-/*---------------------------------*/
-    else {
-        printf("\nI'm about to hack Your Mom!\n");
         printf("\nEncoded Message:\nDecimal: %d\nBinary: ", encrypted);
+        print_bin(encrypted, 8);
+    }
+/*---------------------------------*/
+/*---------------------------------*/
+    else if (option == '2') {
+        //message
+        printf("\nGive encrypted message (dec):");
+        scanf("%d", &encrypted);
+
+        printf("8bit encrypted message:\nDecimal: %d\nBinary:  ", encrypted);
+        print_bin(encrypted, 8);
+
+        //OG key
+        printf("\nGive key (dec):");
+        scanf("%d", &key);
+
+        printf("10-bit key:\nDecimal: %d\nBinary:  ", key);
+        print_bin(key, 10);
+
+        if (init(key, &k1, &k2) == -1) { //saftey
+            return 1;
+        }
+
+        message = decrypt(encrypted, k1, k2);
+        if (message == -1) { //saftey
+            return 1;
+        }
+        printf("\nDecoded:\nDecimal %d\nBinary: ", message);
+        print_bin(message, 8);
+    }
+/*---------------------------------*/
+    else { //hack
+        //message
+        printf("\nGive message (dec):");
+        scanf("%d", &message);
+
+        printf("8bit message:\nDecimal: %d\nBinary:  ", message);
+        print_bin(message, 8);
+
+        //encrypted
+        printf("\nGive encrypted message (dec):");
+        scanf("%d", &encrypted);
+
+        printf("8bit encrypted message:\nDecimal: %d\nBinary:  ", encrypted);
+        print_bin(encrypted, 8);
+
+
+        printf("\nI'm about to hack Your Mom!\n");
+        printf("\nEncoded Message:\nDecimal: %d\nBinary:  ", encrypted);
         print_bin(encrypted, 8);
         
         int check = hack(message, encrypted);
@@ -529,7 +574,8 @@ int hack(int message, int encrypted) {
     int output,k1,k2;
     int j = 1;
     
-    int flag=0;
+    int flag=1;
+
 
     for (int i = 0; i < 1024; i++) {
         if (init(i,&k1,&k2) == -1) { //saftey
@@ -537,13 +583,14 @@ int hack(int message, int encrypted) {
         }
         output=encrypt(message, k1, k2);
         if (output == encrypted) {
-            printf("\n10-bit key Found (#%d):\nDecimal: %d\nBinary: ", j,i);
+            flag = 0;
+            printf("\n10-bit key Found (#%d) |  Time: %f \nDecimal: %d\nBinary:  ", j, 0.0,i);
             print_bin(i, 10);
             j++;
         }
     }
-
-    if (flag) {
+   
+    if (flag) { // 0 false 1 true
         return 1;
     }
 
