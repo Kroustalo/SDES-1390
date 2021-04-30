@@ -2,7 +2,7 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="SDES_1390" />
+		<Option title="SDES-1390" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
