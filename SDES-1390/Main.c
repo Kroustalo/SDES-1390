@@ -7,26 +7,25 @@
 #include <sys/time.h>
 
 /*
-. Είσοδος:   00010101
-. Κλειδί:  0101101000
-. Έξοδος:    11001111
+ Input:  00010101
+ Key:    0101101000
+ Output: 11001111
 */
 
 
 //Prototypes
-static inline int bin(int bits, int shift); //aux function for packing shi(f)t commands
-void print_bin(int n, int bits); //aux print in bin
-void Split(int n, int bits, int* split); //spilt custom
+void print_bin(int n, int bits); //Print Decimal numbers in Binary
+void Split(int n, int bits, int* split); //Spilt even bits in pairs
 
-int P10_perm(int key); // function to calclulate P10
-void LS_1(int* split); //Shifts the 5bit keys array once to the left (with loop)
+int P10_perm(int key); // Function to calclulate P10
+void LS_1(int* split); //Shifts the 5-bit keys array once to the left (with loop)
 int K_perm(int split[2]); //Create K1 key
 
-int IP_perm(int message); // function to calclulate IP
-int EP_perm(int right); //function to calclulate EP perm
+int IP_perm(int message); //Function to calclulate IP perm
+int EP_perm(int right); //Function to calclulate EP perm
 
-int grid(int S, int array[4][4]); //extract elements from array
-int P4_perm(int parts[2]); //P4 perm after array
+int grid(int S, int array[4][4]);//Extract elements from array using S
+int P4_perm(int parts[2]); //P4 perm after finding numbers from grid
 
 int IP_REV_perm(int message); // function to calclulate REVERSED IP PERM
 
@@ -43,47 +42,30 @@ int main(void) {
 
     char option; //encrypt 1 | decrypt 2 | hack 3
 
-    printf("1) Encrypt\n2) Decrypt\n3) Hack\nSelect Option: ");
-    scanf("%c", &option);
-    while (option != '1' && option != '2' && option != '3') {
-        fflush(stdin);
-        printf("Error: Not Vaild Option, select again:\n1) Encrypt\n2) Decrypt\n3) Hack\nSelect Option: ");
-
+    //Select Option
+    do{
+        printf("1) Encrypt\n2) Decrypt\n3) Hack\nSelect Option: ");
         scanf("%c", &option);
+
+        fflush(stdin);
+        if((option != '1' && option != '2' && option != '3'))
+            printf("Error: Not Vaild Option, select again:\n");
+
     }
+    while (option != '1' && option != '2' && option != '3');
 
 
     int  key, message, encrypted, k1, k2;
-
-    /*
-    message = 0b11110011;
-    key = 0b1010000010; //642
-    // 0b1000001100 524
-
-    message = 0b00010101;
-    key = 0b0101101000; //360
-
-    message = 0b00000000;
-    key = 0b1111111111;
-
-    message = 200;
-    key = 550;
-
-    encrypted = 131;
-    */
-
-
-/*---------------------------------*/
-    if (option == '1') {
+    if (option == '1') { //Encrypt
         //message
-        printf("\nGive message (dec/bin):");
+        printf("\nGive 8-bit message (dec/bin):");
         message=read_num();
 
-        printf("8bit message:\nDecimal: %d\nBinary:  ", message);
+        printf("8-bit message:\nDecimal: %d\nBinary:  ", message);
         print_bin(message, 8);
 
         //OG key
-        printf("\nGive key (dec/bin):");
+        printf("\nGive 10-bit key (dec/bin):");
         key=read_num();
 
         printf("10-bit key:\nDecimal: %d\nBinary:  ", key);
@@ -92,7 +74,6 @@ int main(void) {
         if (init(key, &k1, &k2) == -1) { //saftey
             return 1;
         }
-
 
         encrypted = encrypt(message, k1, k2);
         if (encrypted == -1) { //saftey
@@ -101,48 +82,45 @@ int main(void) {
         printf("\nEncoded Message:\nDecimal: %d\nBinary: ", encrypted);
         print_bin(encrypted, 8);
     }
-/*---------------------------------*/
-/*---------------------------------*/
-    else if (option == '2') {
+    else if (option == '2') { //Decrypt
         //message
-        printf("\nGive encrypted message (dec/bin):");
+        printf("\nGive 8-bit encrypted message (dec/bin):");
         encrypted=read_num();
 
-        printf("8bit encrypted message:\nDecimal: %d\nBinary:  ", encrypted);
+        printf("8-bit encrypted message:\nDecimal: %d\nBinary:  ", encrypted);
         print_bin(encrypted, 8);
 
         //OG key
-        printf("\nGive key (dec/bin):");
+        printf("\nGive 10-bit key (dec/bin):");
         key=read_num();
 
         printf("10-bit key:\nDecimal: %d\nBinary:  ", key);
         print_bin(key, 10);
 
-        if (init(key, &k1, &k2) == -1) { //saftey
+        if (init(key, &k1, &k2) == -1) //saftey
             return 1;
-        }
+
 
         message = decrypt(encrypted, k1, k2);
-        if (message == -1) { //saftey
-            return 1;
-        }
+        if (message == -1)
+            return 1;//saftey
+
         printf("\nDecoded:\nDecimal %d\nBinary: ", message);
         print_bin(message, 8);
     }
-/*---------------------------------*/
-    else { //hack
+    else { //Bruteforce Hacking
         //message
-        printf("\nGive message (dec/bin): ");
+        printf("\nGive 8-bit message (dec/bin): ");
         message=read_num();
 
-        printf("8bit message:\nDecimal: %d\nBinary:  ", message);
+        printf("8-bit message:\nDecimal: %d\nBinary:  ", message);
         print_bin(message, 8);
 
         //encrypted
-        printf("\nGive encrypted message (dec/bin):");
+        printf("\nGive 8-bit encrypted message (dec/bin):");
         encrypted=read_num();
 
-        printf("8bit encrypted message:\nDecimal: %d\nBinary:  ", encrypted);
+        printf("8-bit encrypted message:\nDecimal: %d\nBinary:  ", encrypted);
         print_bin(encrypted, 8);
 
         printf("\nBrute Force Initializing!\n");
@@ -161,7 +139,7 @@ int main(void) {
 
 }
 
-//aux print in bin
+//Print Decimal numbers in Binary
 void print_bin(int n, int bits) {
     unsigned i;
     for (i = (1 << (bits - 1)); i > 0; i = i / 2)
@@ -169,19 +147,14 @@ void print_bin(int n, int bits) {
     printf("\n");
 }
 
-//aux function for packing shi(f)t commands
-static inline int bin(int bits, int shift) {
-    return (1 << (bits - 1)) >> shift;
-}
-
-//spilt custom in half (even bit)
+//Spilt even bits in pairs
 void Split(int n, int bits, int* split) {
     *split = n >> (bits / 2); //upper part
     split++;
     *split = ((1 << bits / 2) - 1) & n; //lower part
 }
 
-//function to calclulate P10
+// Function to calclulate P10
 int P10_perm(int key) {
     if (key > 1023) {
         printf("value is greater than 10 bits");
@@ -200,7 +173,7 @@ int P10_perm(int key) {
 
 }
 
-void LS_1(int* split) { //Shifts the 5bit keys array once to the left (with loop)
+void LS_1(int* split) { //Shifts the 5-bit keys array once to the left (with loop)
     int temp;
     for (int i = 0; i < 2; i++) {
         temp = *split << 1;
@@ -210,7 +183,6 @@ void LS_1(int* split) { //Shifts the 5bit keys array once to the left (with loop
         *split = temp;
         split++;
     }
-
 }
 
 int K_perm(int split[2]) { //Create K keys with specific input
@@ -218,7 +190,7 @@ int K_perm(int split[2]) { //Create K keys with specific input
     temp = temp + split[1]; //combine to extract 8 lower bits
 
     //print_bin(temp, 10); //test
-    temp = temp & 0b11111111; // get 8bit number
+    temp = temp & 0b11111111; // get 8-bit number from the two 5-bit numbers
     //print_bin(temp, 8); //test
 
     int k = 0;
@@ -229,11 +201,10 @@ int K_perm(int split[2]) { //Create K keys with specific input
         else
             k += (temp & (1 << i)) >> -P8_GUIDE[i];
     }
-
     return k;
 }
 
-// function to calclulate IP
+//Function to calclulate IP perm
 int IP_perm(int message){
     if (message > 255) {
         printf("value is greater than 8 bits");
@@ -252,9 +223,9 @@ int IP_perm(int message){
 
 }
 
-//function to calclulate EP perm
+//Function to calclulate EP perm
 int EP_perm(int right) {
-    if (right > 15) {
+    if (right > 15) { //saftey
         printf("value is greater than 4 bits");
         return -1;
     }
@@ -285,17 +256,17 @@ int EP_perm(int right) {
 
 }
 
-int grid(int S, int array[4][4]) { //extract elements from array
+int grid(int S, int array[4][4]) { //Extract elements from array using S
 
     int row, col;
-    row = ((0b1000 & S) >> 2) + (0b0001 & S); //first and fourth
-    col = (0b0110 & S) >> 1;//second and third
+    row = ((0b1000 & S) >> 2) + (0b0001 & S); //First and Fourth Bits
+    col = (0b0110 & S) >> 1; //Second and Third Bits
 
     return array[row][col];
 
 }
 
-//P4 perm after array
+//P4 perm after finding numbers from grid
 int P4_perm(int parts[2]) {
     if (parts[0] > 3) {
         printf("part 1 is greater than 2 bits");
@@ -317,8 +288,6 @@ int P4_perm(int parts[2]) {
         else
             temp += (value & (1 << i)) >> -P4_GUIDE1[i];
     }
-
-
     return temp;
 }
 
@@ -403,6 +372,8 @@ int process(int LR[2], int k, int* LFR) {
     */
     LFR++;
     *LFR = LR[1]; //right
+
+    //LFR array contains the value in parts
 
     return 0;
 }
