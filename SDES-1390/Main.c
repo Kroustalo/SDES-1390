@@ -41,6 +41,7 @@ int read_num();//reads input
 int main(void) {
 
     char option; //encrypt 1 | decrypt 2 | hack 3
+    int  key, message, encrypted, k1, k2;
 
     //Select Option
     do{
@@ -48,29 +49,47 @@ int main(void) {
         scanf("%c", &option);
 
         fflush(stdin);
-        if((option != '1' && option != '2' && option != '3'))
-            printf("Error: Not Vaild Option, select again:\n");
+        if(option != '1' && option != '2' && option != '3')
+            printf("\nError: Not Vaild Option, select again:\n");
 
     }
     while (option != '1' && option != '2' && option != '3');
 
 
-    int  key, message, encrypted, k1, k2;
-    if (option == '1') { //Encrypt
-        //message
-        printf("\nGive 8-bit message (dec/bin):");
-        message=read_num();
+    //MESSAGE
+    if(option == '1' || option == '3'){
+         //message
+        printf("\nGive 8-bit message (dec/bin): ");
+        message=read_num(8);
 
         printf("8-bit message:\nDecimal: %d\nBinary:  ", message);
         print_bin(message, 8);
+    }
 
-        //OG key
-        printf("\nGive 10-bit key (dec/bin):");
-        key=read_num();
+    //ENCRPYTED MESSAGE
+    if(option == '2' || option == '3'){
+        //encrypted message
+        printf("\nGive 8-bit encrypted message (dec/bin): ");
+        encrypted=read_num(8);
+
+        printf("8-bit encrypted message:\nDecimal: %d\nBinary:  ", encrypted);
+        print_bin(encrypted, 8);
+
+    }
+
+    //ENCRYPTION KEY
+    if(option == '1' || option == '2'){
+       //key
+        printf("\nGive 10-bit key (dec/bin): ");
+        key=read_num(10);
 
         printf("10-bit key:\nDecimal: %d\nBinary:  ", key);
         print_bin(key, 10);
+    }
 
+
+    if (option == '1') { //Encrypt
+        printf("\nEncrypting!\n");
         init(key, &k1, &k2);
 
         encrypted = encrypt(message, k1, k2);
@@ -79,20 +98,7 @@ int main(void) {
         print_bin(encrypted, 8);
     }
     else if (option == '2') { //Decrypt
-        //message
-        printf("\nGive 8-bit encrypted message (dec/bin):");
-        encrypted=read_num();
-
-        printf("8-bit encrypted message:\nDecimal: %d\nBinary:  ", encrypted);
-        print_bin(encrypted, 8);
-
-        //OG key
-        printf("\nGive 10-bit key (dec/bin):");
-        key=read_num();
-
-        printf("10-bit key:\nDecimal: %d\nBinary:  ", key);
-        print_bin(key, 10);
-
+        printf("\nDecrypting!\n");
         init(key, &k1, &k2);
 
         message = decrypt(encrypted, k1, k2);
@@ -101,22 +107,7 @@ int main(void) {
         print_bin(message, 8);
     }
     else { //Bruteforce Hacking
-        //message
-        printf("\nGive 8-bit message (dec/bin): ");
-        message=read_num();
-
-        printf("8-bit message:\nDecimal: %d\nBinary:  ", message);
-        print_bin(message, 8);
-
-        //encrypted
-        printf("\nGive 8-bit encrypted message (dec/bin): ");
-        encrypted=read_num();
-
-        printf("8-bit encrypted message:\nDecimal: %d\nBinary:  ", encrypted);
-        print_bin(encrypted, 8);
-
         printf("\nBrute Force Initializing!\n");
-
 
         int result = hack(message, encrypted);
         if(result != 0)
@@ -148,7 +139,7 @@ void Split(int n, int bits, int* split) {
 int P10_perm(int key) {
     int temp = 0;
     int P10_GUIDE[10] = { 4,1,-1,3,-4,3,-1,2,-1,-6 }; //Shift positions according to pdf
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) { //PERMUTATE
         if (P10_GUIDE[i] >= 0)
             temp += (key & (1 << i)) << P10_GUIDE[i];
         else
@@ -180,7 +171,7 @@ int K_perm(int split[2]) { //Create K keys with specific input
 
     int k = 0;
     int P8_GUIDE[8] = { 1,-1,1,2,3,-3,-2,-1}; //Shift positions according to pdf
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < 8; i++) { //PERMUTATE
         if (P8_GUIDE[i] >= 0)
             k += (temp & (1 << i)) << P8_GUIDE[i];
         else
@@ -193,7 +184,7 @@ int K_perm(int split[2]) { //Create K keys with specific input
 int IP_perm(int message){
     int temp = 0;
     int IP_GUIDE[8] = { 2,-1,4,-2,-1,0,1,-3}; //Shift positions according to pdf
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < 8; i++) { //PERMUTATE
         if (IP_GUIDE[i] >= 0)
             temp += (message & (1 << i)) << IP_GUIDE[i];
         else
@@ -210,7 +201,7 @@ int EP_perm(int right) {
     //lower
     int EP_GUIDE[4] = { 3,-1,-1,-1 }; //Shift positions according to pdf
     for (int j = 0; j < 2; j++) {
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 4; i++) { //PERMUTATE
             if (EP_GUIDE[i] >= 0)
                 temp += (right & (1 << i)) << EP_GUIDE[i];
             else
@@ -229,13 +220,11 @@ int EP_perm(int right) {
 }
 
 int grid(int S, int array[4][4]) { //Extract elements from array using S
-
     int row, col;
     row = ((0b1000 & S) >> 2) + (0b0001 & S); //First and Fourth Bits
     col = (0b0110 & S) >> 1; //Second and Third Bits
 
     return array[row][col];
-
 }
 
 //P4 perm after finding numbers from grid
@@ -244,7 +233,7 @@ int P4_perm(int parts[2]) {
     int temp = 0;
     //higher part
     int P4_GUIDE1[4] = { 2,0,1,-3 }; //Shift positions according to pdf
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 4; i++) { //PERMUTATE
         if (P4_GUIDE1[i] >= 0)
             temp += (value & (1 << i)) << P4_GUIDE1[i];
         else
@@ -325,10 +314,11 @@ void process(int LR[2], int k, int* LFR) {
     printf("\n(R)Right: %d\n", LR[1]);
     print_bin(LR[1], 4);
     */
+
     LFR++;
     *LFR = LR[1]; //right
 
-    //LFR array contains the value in parts
+    //LFR array contains the value splitted in each cells
 
 }
 
@@ -336,7 +326,7 @@ void process(int LR[2], int k, int* LFR) {
 int IP_REV_perm(int message) {
     int temp = 0;
     int IP_GUIDE[8] = { 1,2,-2,1,3,0,-4,-1 }; //Shift positions according to pdf
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < 8; i++) { //PERMUTATE
         if (IP_GUIDE[i] >= 0)
             temp += (message & (1 << i)) << IP_GUIDE[i];
         else
@@ -401,6 +391,7 @@ int encrypt(int message, int k1, int k2) {
 
     //ip perm
     message = IP_perm(message);
+
     /*
     printf("\nIP: %d\n", message);
     print_bin(message, 8);
@@ -498,36 +489,49 @@ int hack(int message, int encrypted) {
         }
     }
 
-    if (found==0) {
+    if (found==0)
         return found;
-    }
-    else{
+    else
         printf("\nAverage time per found key: %ld us\n",total/found);
-    }
 
     return found;
 }
 
 //reads input
-int read_num(){
-    char c[20]; //We assume that the length is not hit
-    int a=0,i=0;
-    fflush(stdin);
-    while ((c[i] = getchar()) != '\n' || i==18) i++;
+int read_num(int bits){
+    char c[20]; //We assume that the length is not hit and that the numbers are correctly inputed
+    int a,i,flag;
 
-    c[i]='\0';
+    do{
+    a=0,i=0,flag=0;
+    fflush(stdin);
+    while ((c[i] = getchar()) != '\n' || i==18) i++; //Read Input
+
+    c[i]='\0'; //Add termination char
 
     i=2;
-    if(c[0]=='0'){
+    if(c[0]=='0'){ //check if num is binary by having the intentifier "0b"
         if(c[1]=='b'){
+            flag=1;
             while (c[i]!= '\0'){ // read a line char by char
                 a <<= 1;                        // shift the uint32 a bit left
                 a += (c[i] - '0') & 1;             // convert the char to 0/1 and put it at the end of the binary
                 i++;
             }
-            return a; //We assume that binary is corect
         }
     }
-    return atoi(c); //we assume that decimal is correct
 
+     if(flag){
+        if(a>=(1<<bits))
+            printf("binary is greater than %d bits, Try again:",bits);
+     }
+     else{
+        a=atoi(c);
+        if(a>=(1<<bits))
+            printf("Decimal is greater than %d, Try again:",(1<<bits)-1);
+     }
+
+    }while (a>=(1<<bits));
+
+    return a;
 }
