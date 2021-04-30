@@ -4,17 +4,16 @@
 #include <time.h>
 
 #include <string.h>
-
-
+#include <sys/time.h>
 
 /*
-• Είσοδος:   00010101
-• Κλειδί:  0101101000
-• Έξοδος:    11001111
+. Είσοδος:   00010101
+. Κλειδί:  0101101000
+. Έξοδος:    11001111
 */
 
-//Prototypes
 
+//Prototypes
 static inline int bin(int bits, int shift); //aux function for packing shi(f)t commands
 void print_bin(int n, int bits); //aux print in bin
 void Split(int n, int bits, int* split); //spilt custom
@@ -38,31 +37,32 @@ int decrypt(int message, int k1, int k2);  //decrypt
 
 int hack(int message, int encrypted); //bruteforce all keys to find the right ones
 
+int read_num();//reads input
 
 int main(void) {
 
-
     char option; //encrypt 1 | decrypt 2 | hack 3
 
-    printf("1) Encrypt\n2) Decrypt\n3) Hack\nSelect Option:");
+    printf("1) Encrypt\n2) Decrypt\n3) Hack\nSelect Option: ");
     scanf("%c", &option);
     while (option != '1' && option != '2' && option != '3') {
-        printf("Error: Not Vaild Option, select again:\n1) Encrypt\n2) Decrypt\n3) Hack\nSelect Option:");
-        fflush(stdout);
+        fflush(stdin);
+        printf("Error: Not Vaild Option, select again:\n1) Encrypt\n2) Decrypt\n3) Hack\nSelect Option: ");
+
         scanf("%c", &option);
     }
-    
+
 
     int  key, message, encrypted, k1, k2;
-        
 
+    /*
     message = 0b11110011;
     key = 0b1010000010; //642
     // 0b1000001100 524
 
     message = 0b00010101;
     key = 0b0101101000; //360
-   
+
     message = 0b00000000;
     key = 0b1111111111;
 
@@ -70,20 +70,21 @@ int main(void) {
     key = 550;
 
     encrypted = 131;
-       
+    */
+
 
 /*---------------------------------*/
     if (option == '1') {
         //message
-        printf("\nGive message (dec):");
-        scanf("%d", &message);
+        printf("\nGive message (dec/bin):");
+        message=read_num();
 
         printf("8bit message:\nDecimal: %d\nBinary:  ", message);
         print_bin(message, 8);
 
         //OG key
-        printf("\nGive key (dec):");
-        scanf("%d", &key);
+        printf("\nGive key (dec/bin):");
+        key=read_num();
 
         printf("10-bit key:\nDecimal: %d\nBinary:  ", key);
         print_bin(key, 10);
@@ -104,15 +105,15 @@ int main(void) {
 /*---------------------------------*/
     else if (option == '2') {
         //message
-        printf("\nGive encrypted message (dec):");
-        scanf("%d", &encrypted);
+        printf("\nGive encrypted message (dec/bin):");
+        encrypted=read_num();
 
         printf("8bit encrypted message:\nDecimal: %d\nBinary:  ", encrypted);
         print_bin(encrypted, 8);
 
         //OG key
-        printf("\nGive key (dec):");
-        scanf("%d", &key);
+        printf("\nGive key (dec/bin):");
+        key=read_num();
 
         printf("10-bit key:\nDecimal: %d\nBinary:  ", key);
         print_bin(key, 10);
@@ -131,31 +132,29 @@ int main(void) {
 /*---------------------------------*/
     else { //hack
         //message
-        printf("\nGive message (dec):");
-        scanf("%d", &message);
+        printf("\nGive message (dec/bin): ");
+        message=read_num();
 
         printf("8bit message:\nDecimal: %d\nBinary:  ", message);
         print_bin(message, 8);
 
         //encrypted
-        printf("\nGive encrypted message (dec):");
-        scanf("%d", &encrypted);
+        printf("\nGive encrypted message (dec/bin):");
+        encrypted=read_num();
 
         printf("8bit encrypted message:\nDecimal: %d\nBinary:  ", encrypted);
         print_bin(encrypted, 8);
 
+        printf("\nBrute Force Initializing!\n");
 
-        printf("\nI'm about to hack Your Mom!\n");
-        printf("\nEncoded Message:\nDecimal: %d\nBinary:  ", encrypted);
-        print_bin(encrypted, 8);
-        
+
         int check = hack(message, encrypted);
         if (check == -1) //saftey
             return 1;
         else if(check == 0)
-            printf("\nI Hacked Your Mom!\n");
+            printf("\nKeys Found!\n");
         else if(check == 1)
-            printf("Your mom is so big, that's shes unhackable\n");
+            printf("\nKeys Not Found\n");
     }
 
     return 0;
@@ -177,7 +176,7 @@ static inline int bin(int bits, int shift) {
 
 //spilt custom in half (even bit)
 void Split(int n, int bits, int* split) {
-    *split = n >> (bits / 2); //upper part 
+    *split = n >> (bits / 2); //upper part
     split++;
     *split = ((1 << bits / 2) - 1) & n; //lower part
 }
@@ -262,7 +261,7 @@ int EP_perm(int right) {
 
     int temp = 0;
 
-    //lower 
+    //lower
     int EP_GUIDE[4] = { 3,-1,-1,-1 }; //Shift positions according to pdf
     for (int j = 0; j < 2; j++) {
         for (int i = 0; i < 4; i++) {
@@ -310,7 +309,7 @@ int P4_perm(int parts[2]) {
 
     int value = (parts[0] << 2) + parts[1];
     int temp = 0;
-    //higher part 
+    //higher part
     int P4_GUIDE1[4] = { 2,0,1,-3 }; //Shift positions according to pdf
     for (int i = 0; i < 4; i++) {
         if (P4_GUIDE1[i] >= 0)
@@ -335,7 +334,7 @@ int process(int LR[2], int k, int* LFR) {
     int S[2]; //for s0 and s1 respectivly
     int parts[2]; //returns from s0 and s1
     int p4;
-    
+
     /*
     printf("\nLEFT: %d\n", LR[0]);
     print_bin(LR[0], 4);
@@ -348,7 +347,7 @@ int process(int LR[2], int k, int* LFR) {
     if (EP == -1) { //saftey
         return -1;
     }
-    
+
     /*
     printf("\nEP: %d\n", EP);
     print_bin(EP, 8);
@@ -387,7 +386,7 @@ int process(int LR[2], int k, int* LFR) {
     if (p4 == -1) { //saftey
         return -1; //not really worth it
     }
-    
+
     /*
     printf("\nP4: %d\n", p4);
     print_bin(p4, 4);
@@ -412,7 +411,7 @@ int process(int LR[2], int k, int* LFR) {
 int IP_REV_perm(int message) {
     if (message > 255) {
         printf("value is greater than 8 bits");
-        return -1; 
+        return -1;
     }
 
     int temp = 0;
@@ -504,7 +503,7 @@ int encrypt(int message, int k1, int k2) {
     if (process(LR, k1, enc1) == -1) { //saftey
         return -1;
     }
-    
+
 
     //switch
     LR[0] = enc1[1];
@@ -572,27 +571,64 @@ int decrypt(int message, int k1, int k2) {
 //bruteforce all keys to find the right ones
 int hack(int message, int encrypted) {
     int output,k1,k2;
-    int j = 1;
-    
-    int flag=1;
+    int found = 0;
+    unsigned long time,total;
+    struct timeval start, end;
 
-
+    total=0;
+    gettimeofday(&start,NULL);
     for (int i = 0; i < 1024; i++) {
         if (init(i,&k1,&k2) == -1) { //saftey
             return -1;
         }
+
         output=encrypt(message, k1, k2);
+        if(output==-1){
+            return -1;
+        }
+
         if (output == encrypted) {
-            flag = 0;
-            printf("\n10-bit key Found (#%d) |  Time: %f \nDecimal: %d\nBinary:  ", j, 0.0,i);
+            gettimeofday(&end, NULL);
+            time=(end.tv_sec * 1000000 + end.tv_usec)-(start.tv_sec * 1000000 + start.tv_usec);
+            found++;
+            total+=time;
+            printf("\n10-bit key Found (#%d) |  Time: %ld us\nDecimal: %d\nBinary:  ", found, time,i);
             print_bin(i, 10);
-            j++;
+
+            gettimeofday(&start,NULL);
         }
     }
-   
-    if (flag) { // 0 false 1 true
+
+    if (found==0) {
         return 1;
+    }
+    else{
+        printf("\nAverage time per found key: %ld us\n",total/found);
     }
 
     return 0;
+}
+
+//reads input
+int read_num(){
+    char c[20]; //We assume that the length is not hit
+    int a=0,i=0;
+    fflush(stdin);
+    while ((c[i] = getchar()) != '\n' || i==18) i++;
+
+    c[i]='\0';
+
+    i=2;
+    if(c[0]=='0'){
+        if(c[1]=='b'){
+            while (c[i]!= '\0'){ // read a line char by char
+                a <<= 1;                        // shift the uint32 a bit left
+                a += (c[i] - '0') & 1;             // convert the char to 0/1 and put it at the end of the binary
+                i++;
+            }
+            return a; //We assume that binary is corect
+        }
+    }
+    return atoi(c); //we assume that decimal is correct
+
 }
