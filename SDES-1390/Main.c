@@ -3,13 +3,14 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include <string.h>
 #include <sys/time.h>
 
-/*
- Input:  00010101
- Key:    0101101000
- Output: 11001111
+#define BUFFERSIZE 20
+
+/* example
+ Input:  00010101   021
+ Key:    0101101000 360
+ Output: 11001111   207
 */
 
 //Prototypes
@@ -39,24 +40,27 @@ int read_num();//reads input
 
 int main(void) {
 
-    char option; //encrypt 1 | decrypt 2 | hack 3
+    char datain[BUFFERSIZE];
+    int option;//encrypt 1 | decrypt 2 | hack 3
     int  key, message, encrypted, k1, k2;
 
+    //intro
+    printf("Welcome to S-DES program!!!\n");
     //Select Option (char 1,2 or 3)
     do{
         printf("1) Encrypt\n2) Decrypt\n3) Hack\nSelect Option: ");
-        scanf("%c", &option);
-
-        fflush(stdin);
-        if(option != '1' && option != '2' && option != '3')
+        fgets(datain,20,stdin);
+        if(sscanf(datain, "%d", &option) != 1){
+            printf("Error: Value not read Try again\n"); //read again
+            option=-1;
+        }
+        if(option != 1 && option != 2 && option != 3)
             printf("\nError: Not Vaild Option, select again:\n");
-
     }
-    while (option != '1' && option != '2' && option != '3');
-
+    while (option != 1 && option != 2 && option != 3);
 
     //MESSAGE
-    if(option == '1' || option == '3'){
+    if(option == 1 || option == 3){
          //message
         printf("\nGive 8-bit message (dec/bin): ");
         message=read_num(8);
@@ -66,7 +70,7 @@ int main(void) {
     }
 
     //ENCRPYTED MESSAGE
-    if(option == '2' || option == '3'){
+    if(option == 2 || option == 3){
         //encrypted message
         printf("\nGive 8-bit encrypted message (dec/bin): ");
         encrypted=read_num(8);
@@ -77,7 +81,7 @@ int main(void) {
     }
 
     //ENCRYPTION KEY
-    if(option == '1' || option == '2'){
+    if(option == 1 || option == 2){
        //key
         printf("\nGive 10-bit key (dec/bin): ");
         key=read_num(10);
@@ -87,7 +91,7 @@ int main(void) {
     }
 
 
-    if (option == '1') { //Encrypt
+    if (option == 1) { //Encrypt
         printf("\nEncrypting!\n");
         init(key, &k1, &k2);
 
@@ -96,7 +100,7 @@ int main(void) {
         printf("\nEncoded Message:\nDecimal: %d\nBinary: ", encrypted);
         print_bin(encrypted, 8);
     }
-    else if (option == '2') { //Decrypt
+    else if (option == 2) { //Decrypt
         printf("\nDecrypting!\n");
         init(key, &k1, &k2);
 
@@ -115,13 +119,14 @@ int main(void) {
             printf("\nKeys Not Found\n");
     }
 
+     printf("\nProgram Done\nProgram made by Dimitrios Sideris 1390\n");
     return 0;
 
 }
 
 //Print Decimal numbers in Binary
 void print_bin(int n, int bits) {
-    unsigned i;
+    int i;
     for (i = (1 << (bits - 1)); i > 0; i = i / 2)
         (n & i) ? printf("1") : printf("0");
     printf("\n");
@@ -495,42 +500,70 @@ int hack(int message, int encrypted) {
     return found; //return the amount of found keys for main
 }
 
-//reads input
 int read_num(int bits){
-    char c[17]; //We assume that the length is not exceeded and that the numbers are correctly inputed
-    int a,i,flag;
+    int a,i,bin_flag,dec_flag;
 
+    char c[BUFFERSIZE]; //We assume that the length is not exceeded and that the numbers are correctly inputed
     do{
-    a=0,i=0,flag=0;
-    fflush(stdin);
-    while ((c[i] = getchar()) != '\n' || i==16) i++; //Read Input
-
-    c[i]='\0'; //Add termination char
-
-    i=2;
-    if(c[0]=='0'){ //check if number is binary by having the intentifier "0b"
-        if(c[1]=='b'){
-            flag=1;
-            while (c[i]!= '\0'){          // read a line char by char
-                a <<= 1;                 // shift the uint32 a bit left
-                a += (c[i] - '0') & 1;  // convert the char to 0/1 and put it at the end of the binary
-                i++;
+        fgets(c,20,stdin);
+        a=0,bin_flag=0,dec_flag=1;
+        //check if number is decimal
+        for(i=0;c[i+1]!='\0';i++){
+            if(!(c[i]>='0' && c[i]<='9')){
+                dec_flag=0;
+                break;
             }
         }
-    }
 
-    //check value based on flag for bin/dec with the accorded warning messages
-     if(flag){
-        if(a>=(1<<bits))
-            printf("binary is greater than %d bits, Try again:",bits);
-     }
-     else{
-        a=atoi(c);
-        if(a>=(1<<bits))
-            printf("Decimal is greater than %d, Try again:",(1<<bits)-1);
-     }
+        i=2;
+        //if not decimal check if number is binary or not valid
+        if(!dec_flag){
+            if(c[0]=='0'){ //check if number is binary by having the intendifier "0b"
+                if(c[1]=='b' || c[1]=='B'){
+                    if(c[2]=='0' || c[2]=='1'){
+                        bin_flag=1;
+                        while (c[i+1]!= '\0'){// Read a line char by char until the one next to it is NULL
+
+                            //check if valid Bit
+                            if(c[i]!='0' && c[i]!='1'){
+                                bin_flag=0;
+                                break;
+                            }
+
+                            a <<= 1;                 // shift the bit left
+                            a += (c[i] - '0') & 1;  // convert the char to 0/1 and put it at the end of the binary
+                            i++;
+                        }
+                    }
+                }
+            }
+        }
+        else if (sscanf(c, "%d", & a) != 1) { //read num as decimal with sscanf to check if valid decimal
+                printf("Error: Decimal value not read. Try again: ");
+                a=(1<<bits); //make check false for while to continue (because a is altered)
+                continue;
+            }
+
+        //Print Error for length if at least one of the flags is true
+        if(bin_flag||dec_flag){
+            if (a >= (1 << bits)) { //check for length
+               if (bin_flag)
+                 printf("Binary is greater than %d bits, Try again: ", bits);
+               else if (dec_flag)
+                 printf("Decimal is greater than %d, Try again: ", (1 << bits) - 1);
+             }
+        }
+        else if(!bin_flag&&!dec_flag){ //not bin or dec
+            printf("Error: value is not a valid binary. Try again: ");
+            a=(1<<bits); //make check false for while to continue (because a is altered)
+            continue;
+        }
 
     }while (a>=(1<<bits));
 
+    printf("\n");
+
     return a;
 }
+
+
