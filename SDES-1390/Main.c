@@ -12,7 +12,6 @@
  Output: 11001111
 */
 
-
 //Prototypes
 void print_bin(int n, int bits); //Print Decimal numbers in Binary
 void Split(int n, int bits, int* split); //Spilt even bits in pairs
@@ -43,7 +42,7 @@ int main(void) {
     char option; //encrypt 1 | decrypt 2 | hack 3
     int  key, message, encrypted, k1, k2;
 
-    //Select Option
+    //Select Option (char 1,2 or 3)
     do{
         printf("1) Encrypt\n2) Decrypt\n3) Hack\nSelect Option: ");
         scanf("%c", &option);
@@ -109,9 +108,9 @@ int main(void) {
     else { //Bruteforce Hacking
         printf("\nBrute Force Initializing!\n");
 
-        int result = hack(message, encrypted);
-        if(result != 0)
-            printf("\nKeys Found!\n");
+        int found = hack(message, encrypted);
+        if(found != 0)
+            printf("\n(%d) Keys Found!\n",found);
         else
             printf("\nKeys Not Found\n");
     }
@@ -146,7 +145,6 @@ int P10_perm(int key) {
             temp += (key & (1 << i)) >> -P10_GUIDE[i];
     }
     return temp;
-
 }
 
 void LS_1(int* split) { //Shifts the 5-bit keys array once to the left (with loop)
@@ -479,9 +477,9 @@ int hack(int message, int encrypted) {
         if (output == encrypted) {
             gettimeofday(&end, NULL);
 
-            time=(end.tv_sec * 1000000 + end.tv_usec)-(start.tv_sec * 1000000 + start.tv_usec);
+            time=(end.tv_sec * 1000000 + end.tv_usec)-(start.tv_sec * 1000000 + start.tv_usec); //calculate Time
             found++;
-            total+=time;
+            total+=time;// add total time
             printf("\n10-bit key Found (#%d) |  Time: %ld us\nDecimal: %d\nBinary:  ", found, time,i);
             print_bin(i, 10);
 
@@ -494,33 +492,34 @@ int hack(int message, int encrypted) {
     else
         printf("\nAverage time per found key: %ld us\n",total/found);
 
-    return found;
+    return found; //return the amount of found keys for main
 }
 
 //reads input
 int read_num(int bits){
-    char c[20]; //We assume that the length is not hit and that the numbers are correctly inputed
+    char c[17]; //We assume that the length is not exceeded and that the numbers are correctly inputed
     int a,i,flag;
 
     do{
     a=0,i=0,flag=0;
     fflush(stdin);
-    while ((c[i] = getchar()) != '\n' || i==18) i++; //Read Input
+    while ((c[i] = getchar()) != '\n' || i==16) i++; //Read Input
 
     c[i]='\0'; //Add termination char
 
     i=2;
-    if(c[0]=='0'){ //check if num is binary by having the intentifier "0b"
+    if(c[0]=='0'){ //check if number is binary by having the intentifier "0b"
         if(c[1]=='b'){
             flag=1;
-            while (c[i]!= '\0'){ // read a line char by char
-                a <<= 1;                        // shift the uint32 a bit left
-                a += (c[i] - '0') & 1;             // convert the char to 0/1 and put it at the end of the binary
+            while (c[i]!= '\0'){          // read a line char by char
+                a <<= 1;                 // shift the uint32 a bit left
+                a += (c[i] - '0') & 1;  // convert the char to 0/1 and put it at the end of the binary
                 i++;
             }
         }
     }
 
+    //check value based on flag for bin/dec with the accorded warning messages
      if(flag){
         if(a>=(1<<bits))
             printf("binary is greater than %d bits, Try again:",bits);
