@@ -29,8 +29,8 @@ int P4_perm(int parts[2]); //P4 perm after finding numbers from grid
 
 int IP_REV_perm(int message); // function to calclulate REVERSED IP PERM
 
-int init(int key, int* k1, int* k2); //Gets k1 and k2 from key
-int process(int LR[2], int k, int* output); //process function
+void init(int key, int* k1, int* k2); //Gets k1 and k2 from key
+void process(int LR[2], int k, int* output); //process function
 int encrypt(int message, int k1, int k2);  //encrypt
 int decrypt(int message, int k1, int k2);  //decrypt
 
@@ -71,14 +71,10 @@ int main(void) {
         printf("10-bit key:\nDecimal: %d\nBinary:  ", key);
         print_bin(key, 10);
 
-        if (init(key, &k1, &k2) == -1) { //saftey
-            return 1;
-        }
+        init(key, &k1, &k2);
 
         encrypted = encrypt(message, k1, k2);
-        if (encrypted == -1) { //saftey
-            return 1;
-        }
+
         printf("\nEncoded Message:\nDecimal: %d\nBinary: ", encrypted);
         print_bin(encrypted, 8);
     }
@@ -97,13 +93,9 @@ int main(void) {
         printf("10-bit key:\nDecimal: %d\nBinary:  ", key);
         print_bin(key, 10);
 
-        if (init(key, &k1, &k2) == -1) //saftey
-            return 1;
-
+        init(key, &k1, &k2);
 
         message = decrypt(encrypted, k1, k2);
-        if (message == -1)
-            return 1;//saftey
 
         printf("\nDecoded:\nDecimal %d\nBinary: ", message);
         print_bin(message, 8);
@@ -117,7 +109,7 @@ int main(void) {
         print_bin(message, 8);
 
         //encrypted
-        printf("\nGive 8-bit encrypted message (dec/bin):");
+        printf("\nGive 8-bit encrypted message (dec/bin): ");
         encrypted=read_num();
 
         printf("8-bit encrypted message:\nDecimal: %d\nBinary:  ", encrypted);
@@ -126,12 +118,10 @@ int main(void) {
         printf("\nBrute Force Initializing!\n");
 
 
-        int check = hack(message, encrypted);
-        if (check == -1) //saftey
-            return 1;
-        else if(check == 0)
+        int result = hack(message, encrypted);
+        if(result != 0)
             printf("\nKeys Found!\n");
-        else if(check == 1)
+        else
             printf("\nKeys Not Found\n");
     }
 
@@ -156,11 +146,6 @@ void Split(int n, int bits, int* split) {
 
 // Function to calclulate P10
 int P10_perm(int key) {
-    if (key > 1023) {
-        printf("value is greater than 10 bits");
-        return -1;
-    }
-
     int temp = 0;
     int P10_GUIDE[10] = { 4,1,-1,3,-4,3,-1,2,-1,-6 }; //Shift positions according to pdf
     for (int i = 0; i < 10; i++) {
@@ -206,11 +191,6 @@ int K_perm(int split[2]) { //Create K keys with specific input
 
 //Function to calclulate IP perm
 int IP_perm(int message){
-    if (message > 255) {
-        printf("value is greater than 8 bits");
-        return -1;
-    }
-
     int temp = 0;
     int IP_GUIDE[8] = { 2,-1,4,-2,-1,0,1,-3}; //Shift positions according to pdf
     for (int i = 0; i < 8; i++) {
@@ -225,11 +205,6 @@ int IP_perm(int message){
 
 //Function to calclulate EP perm
 int EP_perm(int right) {
-    if (right > 15) { //saftey
-        printf("value is greater than 4 bits");
-        return -1;
-    }
-
     int temp = 0;
 
     //lower
@@ -241,7 +216,7 @@ int EP_perm(int right) {
             else
                 temp += (right & (1 << i)) >> -EP_GUIDE[i];
         }
-        if (j == 0) {//for lower part
+        if (j == 0) {//for lower part kinda hacky but it works
             EP_GUIDE[0] = 1;
             EP_GUIDE[1] = 1;
             EP_GUIDE[2] = 1;
@@ -250,10 +225,7 @@ int EP_perm(int right) {
             temp = temp << 4;
         }
     }
-
-
     return temp;
-
 }
 
 int grid(int S, int array[4][4]) { //Extract elements from array using S
@@ -268,16 +240,6 @@ int grid(int S, int array[4][4]) { //Extract elements from array using S
 
 //P4 perm after finding numbers from grid
 int P4_perm(int parts[2]) {
-    if (parts[0] > 3) {
-        printf("part 1 is greater than 2 bits");
-        return -1;
-    }
-    if (parts[1] > 3) {
-        printf("part 2 is greater than 2 bits");
-        return -1;
-    }
-
-
     int value = (parts[0] << 2) + parts[1];
     int temp = 0;
     //higher part
@@ -293,7 +255,7 @@ int P4_perm(int parts[2]) {
 
 
 //encrypting function
-int process(int LR[2], int k, int* LFR) {
+void process(int LR[2], int k, int* LFR) {
 
     int EP, XOROUT1;
 
@@ -313,10 +275,6 @@ int process(int LR[2], int k, int* LFR) {
 
     //EP
     EP = EP_perm(LR[1]);
-    if (EP == -1) { //saftey
-        return -1;
-    }
-
     /*
     printf("\nEP: %d\n", EP);
     print_bin(EP, 8);
@@ -352,9 +310,6 @@ int process(int LR[2], int k, int* LFR) {
 
     //P4
     p4 = P4_perm(parts);
-    if (p4 == -1) { //saftey
-        return -1; //not really worth it
-    }
 
     /*
     printf("\nP4: %d\n", p4);
@@ -375,16 +330,10 @@ int process(int LR[2], int k, int* LFR) {
 
     //LFR array contains the value in parts
 
-    return 0;
 }
 
 // function to calclulate REVERSED IP PERM
 int IP_REV_perm(int message) {
-    if (message > 255) {
-        printf("value is greater than 8 bits");
-        return -1;
-    }
-
     int temp = 0;
     int IP_GUIDE[8] = { 1,2,-2,1,3,0,-4,-1 }; //Shift positions according to pdf
     for (int i = 0; i < 8; i++) {
@@ -397,14 +346,11 @@ int IP_REV_perm(int message) {
 }
 
 //Gets k1 and k2 from key
-int init(int key, int *k1, int *k2) {
+void init(int key, int *k1, int *k2) {
     int split[2];
     //P10
     key = P10_perm(key);
 
-    if (key == -1) { //saftey
-        return -1;
-    }
     /*
     printf("\nP10: %d\n", key);
     print_bin(key, 10);
@@ -448,8 +394,6 @@ int init(int key, int *k1, int *k2) {
     printf("\nK2: %d\n", k2);
     print_bin(k2, 8);
     */
-
-    return 0;
 }
 int encrypt(int message, int k1, int k2) {
     int output, LR[2];
@@ -457,10 +401,6 @@ int encrypt(int message, int k1, int k2) {
 
     //ip perm
     message = IP_perm(message);
-
-    if (message == -1) { //saftey
-        return -1;
-    }
     /*
     printf("\nIP: %d\n", message);
     print_bin(message, 8);
@@ -471,9 +411,7 @@ int encrypt(int message, int k1, int k2) {
 
     //ENCRYPT 1
     //printf("\nENCRYPT #1\n");
-    if (process(LR, k1, enc1) == -1) { //saftey
-        return -1;
-    }
+    process(LR, k1, enc1); //arrays work like pointres
 
 
     //switch
@@ -482,9 +420,7 @@ int encrypt(int message, int k1, int k2) {
 
     //ENCRYPT 2
     //printf("\nENCRYPT #2\n");
-    if (process(LR, k2, enc2) == -1) { //saftey
-        return -1;
-    }
+    process(LR, k2, enc2);
 
     //OUTPUT
     output = 0;
@@ -503,9 +439,6 @@ int decrypt(int message, int k1, int k2) {
     //ip perm
     message = IP_perm(message);
 
-    if (message == -1) { //saftey
-        return -1;
-    }
     /*
     printf("\nIP: %d\n", message);
     print_bin(message, 8);
@@ -516,18 +449,15 @@ int decrypt(int message, int k1, int k2) {
 
     //DECRYPT 1
     //printf("\nDECRYPT #1\n");
-    if (process(LR, k2, enc1) == -1) { //saftey
-        return -1;
-    }
+    process(LR, k2, enc1); //arrays work like pointres
+
     //switch
     LR[0] = enc1[1];
     LR[1] = enc1[0];
 
     //DECRYPT 2
     //printf("\nDECRYPT #2\n");
-    if (process(LR, k1, enc2) == -1) { //saftey
-        return -1;
-    }
+    process(LR, k1, enc2);
 
     //OUTPUT
     output = 0;
@@ -547,19 +477,17 @@ int hack(int message, int encrypted) {
     struct timeval start, end;
 
     total=0;
+
+    //timings
     gettimeofday(&start,NULL);
     for (int i = 0; i < 1024; i++) {
-        if (init(i,&k1,&k2) == -1) { //saftey
-            return -1;
-        }
+        init(i,&k1,&k2);
 
         output=encrypt(message, k1, k2);
-        if(output==-1){
-            return -1;
-        }
 
         if (output == encrypted) {
             gettimeofday(&end, NULL);
+
             time=(end.tv_sec * 1000000 + end.tv_usec)-(start.tv_sec * 1000000 + start.tv_usec);
             found++;
             total+=time;
@@ -571,13 +499,13 @@ int hack(int message, int encrypted) {
     }
 
     if (found==0) {
-        return 1;
+        return found;
     }
     else{
         printf("\nAverage time per found key: %ld us\n",total/found);
     }
 
-    return 0;
+    return found;
 }
 
 //reads input
