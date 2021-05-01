@@ -36,7 +36,7 @@ int decrypt(int message, int k1, int k2);  //decrypt
 
 int hack(int message, int encrypted); //bruteforce all keys to find the right ones
 
-int read_num();//reads input
+int read_num(int bits);//reads input
 
 int main(void) {
 
@@ -119,7 +119,7 @@ int main(void) {
             printf("\nKeys Not Found\n");
     }
 
-     printf("\nProgram Done\nProgram made by Dimitrios Sideris 1390\n");
+     printf("\nProgram Done\nMade by Dimitrios Sideris 1390\n");
     return 0;
 
 }
@@ -145,9 +145,9 @@ int P10_perm(int key) {
     int P10_GUIDE[10] = { 4,1,-1,3,-4,3,-1,2,-1,-6 }; //Shift positions according to pdf
     for (int i = 0; i < 10; i++) { //PERMUTATE
         if (P10_GUIDE[i] >= 0)
-            temp += (key & (1 << i)) << P10_GUIDE[i];
+            temp += (key & (1 << i)) << P10_GUIDE[i]; //move bit left from current pos
         else
-            temp += (key & (1 << i)) >> -P10_GUIDE[i];
+            temp += (key & (1 << i)) >> -P10_GUIDE[i]; //move bit right from current pos
     }
     return temp;
 }
@@ -249,7 +249,7 @@ int P4_perm(int parts[2]) {
 //encrypting function
 void process(int LR[2], int k, int* LFR) {
 
-    int EP, XOROUT1;
+    int EP, XOROUT;
 
     int s0[4][4] = { {1,0,3,2},{3,2,1,0},{0,2,1,3},{3,1,3,2} };
     int s1[4][4] = { {0,1,2,3},{2,0,1,3},{3,0,1,0},{2,1,0,3} };
@@ -273,7 +273,7 @@ void process(int LR[2], int k, int* LFR) {
     */
 
     //XOR OUT
-    XOROUT1 = EP ^ k;
+    XOROUT = EP ^ k;
     /*
     printf("\nEP XOR k1 out: %d\n", XOROUT1);
     print_bin(XOROUT1, 8);
@@ -281,7 +281,7 @@ void process(int LR[2], int k, int* LFR) {
 
 
     //SPLIT 8 #2
-    Split(XOROUT1, 8, S);
+    Split(XOROUT, 8, S);
     /*
     printf("\nS0  PART: %d\n", S[0]);
     print_bin(S[0], 4);
@@ -308,7 +308,7 @@ void process(int LR[2], int k, int* LFR) {
     print_bin(p4, 4);
     */
 
-    //XOR OUT 2
+    //LFR
     *LFR = p4 ^ LR[0]; //result
     /*
     printf("\np4(LF) XOR k out: %d\n", *LFR);
@@ -390,7 +390,7 @@ void init(int key, int *k1, int *k2) {
 }
 int encrypt(int message, int k1, int k2) {
     int output, LR[2];
-    int enc1[2], enc2[2];
+    int LFR[2];
 
     //ip perm
     message = IP_perm(message);
@@ -405,20 +405,20 @@ int encrypt(int message, int k1, int k2) {
 
     //ENCRYPT 1
     //printf("\nENCRYPT #1\n");
-    process(LR, k1, enc1); //arrays work like pointres
+    process(LR, k1, LFR); //arrays work like pointres
 
 
     //switch
-    LR[0] = enc1[1];
-    LR[1] = enc1[0];
+    LR[0] = LFR[1];
+    LR[1] = LFR[0];
 
     //ENCRYPT 2
     //printf("\nENCRYPT #2\n");
-    process(LR, k2, enc2);
+    process(LR, k2, LFR);
 
     //OUTPUT
     output = 0;
-    output += (enc2[0] << 4) + enc2[1];
+    output += (LFR[0] << 4) + LFR[1];
 
     //REVERSED PERMUTATION
     output = IP_REV_perm(output);
@@ -428,7 +428,7 @@ int encrypt(int message, int k1, int k2) {
 
 int decrypt(int message, int k1, int k2) {
     int output, LR[2];
-    int enc1[2], enc2[2];
+    int LFR[2];
 
     //ip perm
     message = IP_perm(message);
@@ -443,19 +443,19 @@ int decrypt(int message, int k1, int k2) {
 
     //DECRYPT 1
     //printf("\nDECRYPT #1\n");
-    process(LR, k2, enc1); //arrays work like pointres
+    process(LR, k2, LFR); //arrays work like pointres
 
     //switch
-    LR[0] = enc1[1];
-    LR[1] = enc1[0];
+    LR[0] = LFR[1];
+    LR[1] = LFR[0];
 
     //DECRYPT 2
     //printf("\nDECRYPT #2\n");
-    process(LR, k1, enc2);
+    process(LR, k1, LFR);
 
     //OUTPUT
     output = 0;
-    output += (enc2[0] << 4) + enc2[1];
+    output += (LFR[0] << 4) + LFR[1];
 
     //REVERSED PERMUTATION
     output = IP_REV_perm(output);
@@ -473,14 +473,14 @@ int hack(int message, int encrypted) {
     total=0;
 
     //timings
-    gettimeofday(&start,NULL);
+    gettimeofday(&start,NULL); //start timer
     for (int i = 0; i < 1024; i++) {
         init(i,&k1,&k2);
 
         output=encrypt(message, k1, k2);
 
         if (output == encrypted) {
-            gettimeofday(&end, NULL);
+            gettimeofday(&end, NULL); //stop timer
 
             time=(end.tv_sec * 1000000 + end.tv_usec)-(start.tv_sec * 1000000 + start.tv_usec); //calculate Time
             found++;
@@ -488,7 +488,7 @@ int hack(int message, int encrypted) {
             printf("\n10-bit key Found (#%d) |  Time: %ld us\nDecimal: %d\nBinary:  ", found, time,i);
             print_bin(i, 10);
 
-            gettimeofday(&start,NULL);
+            gettimeofday(&start,NULL); //start again
         }
     }
 
@@ -505,7 +505,7 @@ int read_num(int bits){
 
     char c[BUFFERSIZE]; //We assume that the length is not exceeded and that the numbers are correctly inputed
     do{
-        fgets(c,20,stdin);
+        fgets(c,BUFFERSIZE,stdin);
         a=0,bin_flag=0,dec_flag=1;
         //check if number is decimal
         for(i=0;c[i+1]!='\0';i++){
@@ -515,24 +515,25 @@ int read_num(int bits){
             }
         }
 
-        i=2;
+        i=2;//initialize counter
         //if not decimal check if number is binary or not valid
         if(!dec_flag){
             if(c[0]=='0'){ //check if number is binary by having the intendifier "0b"
                 if(c[1]=='b' || c[1]=='B'){
-                    if(c[2]=='0' || c[2]=='1'){
+                    if(c[2]=='0' || c[2]=='1'){ //check if it's followed by at least one 0 or 1
                         bin_flag=1;
                         while (c[i+1]!= '\0'){// Read a line char by char until the one next to it is NULL
 
                             //check if valid Bit
                             if(c[i]!='0' && c[i]!='1'){
-                                bin_flag=0;
+                                bin_flag=0; //number is not valid binary (and not decimal since the dec_flag is triggered)
                                 break;
                             }
 
                             a <<= 1;                 // shift the bit left
                             a += (c[i] - '0') & 1;  // convert the char to 0/1 and put it at the end of the binary
                             i++;
+
                         }
                     }
                 }
